@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getDocumentList } from "./features/document/index";
-import { DocumentTree } from "./components/DocumentTree";
+import { FolderList } from "./components/DocumentTree";
 import { Header } from "./components/Header";
 import { StyledApp } from "./styled";
 
@@ -19,7 +19,8 @@ function App() {
   return (
     <StyledApp>
       <Header />
-      <DocumentTree list={documentTree} />
+      <h1>Document Tree</h1>
+      <FolderList list={documentTree} isRoot />
     </StyledApp>
   );
 }

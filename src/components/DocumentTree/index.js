@@ -1,20 +1,15 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { getSubfolders } from "../../features/document";
+import { StyledFolderItem, StyledIcon, StyledIconWrapper } from "./styled";
+import addFolder from "./assets/add_folder.svg";
+import addFile from "./assets/add_file.svg";
+import deleteFolder from "./assets/delete_folder.svg";
 
-const DocumentTree = ({ list }) => {
+const FolderList = ({ list, isRoot = false }) => {
   return (
-    <div>
-      <h1>Document Tree</h1>
-      {list.length > 0 && <FolderList folderList={list} isRoot />}
-    </div>
-  );
-};
-
-const FolderList = ({ folderList, isRoot = false }) => {
-  return (
-    <div>
-      {folderList.map((folder) => (
+    <div style={{ width: "fit-content" }}>
+      {list.map((folder) => (
+        //get folder elements
         <FolderItem key={folder["@id"]} folder={folder} isRoot={isRoot} />
       ))}
     </div>
@@ -22,43 +17,51 @@ const FolderList = ({ folderList, isRoot = false }) => {
 };
 
 const FolderItem = ({ folder, isRoot }) => {
-  const [subFolderList, setSubfolderList] = useState([]);
+  const [subfolderList, setSubfolderList] = useState([]);
   const [isOpen, setOpen] = useState(false);
-  const [isRequested, setRequested] = useState(false);
 
   const getSubfolderList = async () => {
-    if (isRequested) return setOpen(!isOpen);
+    console.log(isRoot);
     const folderId = folder["@id"].replace(
       `http://example.cz/${isRoot ? "Document" : "Folder"}/`,
       ""
     );
 
+    // console.log(`folder id ${folderId}`);
     const url = `folders/${folderId}${
       isRoot ? "_root" : ""
     }/subfolders?namespace=http://example.cz/Folder`;
 
-    const subfoldersList = await getSubfolders(url);
-    setRequested(true);
-    setSubfolderList(subfoldersList);
+    try {
+      const subfolderList = await getSubfolders(url);
+      setSubfolderList(subfolderList);
+      // console.log(subfolderList);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
     getSubfolderList();
   }, []);
 
-  const onOpenFolders = async (e) => {
-    e.stopPropagation();
+  const onOpenFolder = (event) => {
+    event.stopPropagation();
     setOpen(!isOpen);
   };
 
-  const hasChilds = isOpen && subFolderList.length > 0;
-
+  const hasChildren = isOpen && subfolderList.length > 0;
   return (
-    <div onClick={onOpenFolders}>
+    <StyledFolderItem onClick={onOpenFolder} isOpen={hasChildren}>
       {folder["http://example.cz/name"]}
-      {hasChilds && <FolderList folderList={subFolderList} />}
-    </div>
+      <StyledIconWrapper>
+        <StyledIcon src={addFolder} />
+        <StyledIcon src={addFile} />
+        <StyledIcon src={deleteFolder} />
+      </StyledIconWrapper>
+      {hasChildren && <FolderList list={subfolderList} />}
+    </StyledFolderItem>
   );
 };
 
-export { DocumentTree };
+export { FolderList };

@@ -16,6 +16,10 @@ function App() {
     getDocuments();
   }, []);
 
+  if (documentTree.length === 0) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <StyledApp>
       <Header />

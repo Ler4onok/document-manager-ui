@@ -5,10 +5,16 @@ import { HeaderWrap, HeaderRightBlock } from "./styled";
 export const Header = () => {
   return (
     <HeaderWrap>
-      <div>Document Manager</div>
+      <div style={{ fontWeight: "900", fontSize: "22px" }}>
+        Document Manager
+      </div>
       <HeaderRightBlock>
         <SearchField />
-        <div>Log out</div>
+        <div
+          style={{ marginLeft: "25px", fontSize: "17px", fontWeight: "400" }}
+        >
+          Log out
+        </div>
       </HeaderRightBlock>
     </HeaderWrap>
   );

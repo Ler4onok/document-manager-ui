@@ -3,7 +3,12 @@ import { useTransition, animated, useSpring, config } from "react-spring";
 import styled from "styled-components";
 
 import { getSubfolders } from "../../features/document";
-import { StyledFolderItem, StyledIcon, StyledIconWrapper } from "./styled";
+import {
+  StyledFolderItem,
+  StyledIcon,
+  StyledIconWrapper,
+  StyledDocumentTreeWrapper,
+} from "./styled";
 import addFolderIcon from "./assets/add_folder.svg";
 import addFileIcon from "./assets/add_file.svg";
 import deleteFolderIcon from "./assets/delete_folder.svg";
@@ -37,7 +42,7 @@ const FolderItem = ({ folder, isRoot }) => {
       opacity: 1,
       transform: `translate3d(0px,0,0)`,
     },
-    config: config.gentle,
+    config: config.stiff,
   });
 
   const getSubfolderList = async () => {

@@ -15,6 +15,7 @@ export const StyledFolderItem = styled(animated.div)`
   cursor: pointer;
   margin: 15px;
   font-weight: ${(props) => (props.isOpen ? "bold" : "normal")};
+  color: ${(props) => (props.isOpen ? "#2196f3" : "grey")};
 `;
 
 export const StyledIcon = styled.img`

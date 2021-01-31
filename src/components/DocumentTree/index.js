@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTransition, animated, useSpring, config } from "react-spring";
 import styled from "styled-components";
 
-import { getSubfolders } from "../../features/document";
+import {
+  getSubfolders,
+  deleteFolder,
+  addFolder,
+} from "../../features/document";
 import {
   StyledFolderItem,
   StyledIcon,
@@ -12,6 +16,7 @@ import {
 import addFolderIcon from "./assets/add_folder.svg";
 import addFileIcon from "./assets/add_file.svg";
 import deleteFolderIcon from "./assets/delete_folder.svg";
+import { Modal } from "../Modal";
 
 const FolderItemWrapper = styled(animated.div)``;
 
@@ -27,8 +32,12 @@ const FolderList = ({ list, isRoot = false }) => {
 
 const FolderItem = ({ folder, isRoot }) => {
   const [subfolderList, setSubfolderList] = useState([]);
+  const [parentFolderList, setParentFolderList] = useState([]);
   const [isOpen, setOpen] = useState(false);
   const [_opacity, setOpacity] = useState(0);
+  const [isOpenModal, setOpenModal] = useState(false);
+
+  const [isSubmitted, setSubmitted] = useState(false);
 
   const { height, opacity, transform } = useSpring({
     from: { height: 0, opacity: 0, transform: "translate3d(20px,0,0)" },
@@ -59,38 +68,46 @@ const FolderItem = ({ folder, isRoot }) => {
     try {
       const _subfolderList = await getSubfolders(url);
       setSubfolderList(_subfolderList);
+      // console.log(_subfolderList);
       // console.log(subfolderList);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const deleteFolder = async () => {
+  const handleAddFolder = async (newFolder) => {
+    const newF = await addFolder(
+      "Document",
+      newFolder.name,
+      newFolder.description
+    );
+    console.log(newF);
+
+    // const newFolder = await addFolder("Document", name);
+    // console.log(newFolder);
+  };
+
+  const handleDeleteFolder = async () => {
     const folderId = folder["@id"].replace(
       `http://example.cz/${isRoot ? "Document" : "Folder"}/`,
       ""
     );
+    console.log(subfolderList);
+    // deleteFolder(folderId);
 
-    const url = `folders/${folderId}?namespace=http://example.cz/Folder`;
-
-    handleDeleteFolder(folderId);
-
-    // try{
-    //     await request(url, 'DELETE', null, {
-    //       Authorization: `Bearer ${token}`,
-    //     })
-    // }
-    // catch(error){
-    //   console.error(error);
-    // }
+    // handleDeleteFolder(folderId);
   };
 
-  const handleDeleteFolder = (folderId) => {
-    console.log({ folderId });
-    // const updatedSubfolderList = subfolderList.filter(subfolder => subfolder !== folderId);
-    // console.log(updatedSubfolderList);
-    // setSubfolderList(updatedSubfolderList);
-  };
+  //UPDATE THE SUBFOLDER LIST AFTER DELETE
+  // const handleDeleteFolder = (folderId) => {
+  //   console.log({ folderId });
+  //   // console.log(subfolderList);
+  //   const updatedSubfolderList = subfolderList.filter(
+  //     (subfolder) => subfolder !== folderId
+  //   );
+  //   console.log(updatedSubfolderList);
+  //   setSubfolderList(updatedSubfolderList);
+  // };
 
   useEffect(() => {
     getSubfolderList();
@@ -98,7 +115,7 @@ const FolderItem = ({ folder, isRoot }) => {
 
   const onOpenFolder = (event) => {
     event.stopPropagation();
-    setOpen(!isOpen);
+    if (subfolderList.length > 0) setOpen(!isOpen);
   };
 
   const onMouseEnter = (e) => {
@@ -106,32 +123,35 @@ const FolderItem = ({ folder, isRoot }) => {
     setOpacity(1);
   };
 
-  const onMouseOut = (e) => {
+  const onMouseLeave = (e) => {
     e.stopPropagation();
     setOpacity(0);
   };
 
   const hasChildren = isOpen && subfolderList.length > 0;
   return (
-    <StyledFolderItem
-      style={{ height, opacity, transform }}
-      onClick={onOpenFolder}
-      isOpen={hasChildren}
-    >
-      <div
-        style={{ display: "flex" }}
+    <div>
+      <StyledFolderItem
+        style={{ height, opacity, transform }}
+        isOpen={hasChildren}
         onMouseEnter={onMouseEnter}
-        onMouseOut={onMouseOut}
+        onMouseLeave={onMouseLeave}
       >
-        {folder["http://example.cz/name"]}
-        <StyledIconWrapper opacity={_opacity}>
-          <StyledIcon src={addFolderIcon} />
-          <StyledIcon src={addFileIcon} />
-          <StyledIcon src={deleteFolderIcon} onClick={deleteFolder} />
-        </StyledIconWrapper>
-      </div>
-      {hasChildren && <FolderList list={subfolderList} />}
-    </StyledFolderItem>
+        <div style={{ display: "flex" }}>
+          <div onClick={onOpenFolder}>{folder["http://example.cz/name"]}</div>
+          <StyledIconWrapper opacity={_opacity}>
+            <StyledIcon
+              src={addFolderIcon}
+              onClick={() => setOpenModal(true)}
+            />
+            <StyledIcon src={addFileIcon} />
+            <StyledIcon src={deleteFolderIcon} onClick={handleDeleteFolder} />
+          </StyledIconWrapper>
+        </div>
+        {hasChildren && <FolderList list={subfolderList} />}
+      </StyledFolderItem>
+      {isOpenModal && <Modal handleAddFolder={handleAddFolder} />}
+    </div>
   );
 };
 

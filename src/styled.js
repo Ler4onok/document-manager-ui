@@ -15,3 +15,4 @@ export const StyledDocumentTreeWrapper = styled.div`
   margin-left: 10%;
   box-shadow: rgb(189, 189, 189) 5px 5px 10px -1px;
 `;
+

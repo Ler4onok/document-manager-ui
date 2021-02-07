@@ -92,8 +92,8 @@ const FolderItem = ({ folder, isRoot }) => {
       `http://example.cz/${isRoot ? "Document" : "Folder"}/`,
       ""
     );
-    console.log(subfolderList);
-    // deleteFolder(folderId);
+    // console.log(folderId);
+    console.log(deleteFolder(folderId));
 
     // handleDeleteFolder(folderId);
   };
@@ -145,12 +145,17 @@ const FolderItem = ({ folder, isRoot }) => {
               onClick={() => setOpenModal(true)}
             />
             <StyledIcon src={addFileIcon} />
-            <StyledIcon src={deleteFolderIcon} onClick={handleDeleteFolder} />
+            <StyledIcon
+              src={deleteFolderIcon}
+              onClick={() => handleDeleteFolder()}
+            />
           </StyledIconWrapper>
         </div>
         {hasChildren && <FolderList list={subfolderList} />}
       </StyledFolderItem>
-      {isOpenModal && <Modal handleAddFolder={handleAddFolder} />}
+      {isOpenModal && (
+        <Modal handleAddFolder={handleAddFolder} setOpenModal={setOpenModal} />
+      )}
     </div>
   );
 };

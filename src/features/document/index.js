@@ -1,7 +1,8 @@
 import { request } from "../../helpers/index";
 
 const token =
-  "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBkb2N1bWVudC1tYW5hZ2VyLm9yZyIsImp0aSI6Imh0dHA6Ly9vbnRvLmZlbC5jdnV0LmN6L29udG9sb2dpZXMvdXppdmF0ZWwvZG9jdW1lbnQtbWFuYWdlciIsImlhdCI6MTYxMjA4MDk5OCwiZXhwIjoxNjEyMTY3Mzk4LCJyb2xlIjoiUk9MRV9VU0VSLVJPTEVfQURNSU4ifQ.wZg0V5ummcD1_sGFHL-a-pNhirbz7RImyJeYR391t_R4gMfWTNc_lqpegkD9jwehcdNzJBJwTkcHdXxq7baQlQ";
+  "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBkb2N1bWVudC1tYW5hZ2VyLm9yZyIsImp0aSI6Imh0dHA6Ly9vbnRvLmZlbC5jdnV0LmN6L29udG9sb2dpZXMvdXppdmF0ZWwvZG9jdW1lbnQtbWFuYWdlciIsImlhdCI6MTYxMjY4NzEyMSwiZXhwIjoxNjEyNzczNTIxLCJyb2xlIjoiUk9MRV9VU0VSLVJPTEVfQURNSU4ifQ.COtGzJgk-t74z34ftOTeGzXp89YOMU0tUUDZs_hHnfPl2FiQkjxJ-1KpcMX4eT8MN9kHDnGoEHtELmVp-ZuqOA";
+// "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LXVzZXIxQGV4YW1wbGUub3JnIiwiaWF0IjoxNjEyNjg4Mzk0LCJleHAiOjE2MTI2OTE5OTR9.IlzY-BLdRS4Bj95CRH04z3KOYgF6reF3ZtFyCVT3wSA";
 
 export const getDocumentList = async () => {
   const url = "/documents";
@@ -54,7 +55,7 @@ export const addFolder = async (type, name, description) => {
 export const deleteFolder = async (folderId) => {
   const url = `folders/${folderId}?namespace=http://example.cz/Folder`;
   try {
-    await request(url, "DELETE", null, {
+    return await request(url, "DELETE", null, {
       Authorization: `Bearer ${token}`,
     });
   } catch (error) {

@@ -2,15 +2,14 @@ import { Button, TextField } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { StyledModal, StyledModalContainer, StyledLine } from "./styled";
 
-export const Modal = ({ handleAddFolder, setOpenModal }) => {
+export const Modal = ({
+  handleAdd,
+  setOpenModal,
+  children,
+  newObject,
+  header,
+}) => {
   // console.log(isOpenModal);
-  const [newFolder, setNewFolder] = useState({ name: "", description: "" });
-  const handleInput = (event, isName) => {
-    isName
-      ? setNewFolder({ ...newFolder, name: event.target.value })
-      : setNewFolder({ ...newFolder, description: event.target.value });
-    console.log(newFolder);
-  };
 
   return (
     <StyledModalContainer>
@@ -25,7 +24,7 @@ export const Modal = ({ handleAddFolder, setOpenModal }) => {
           }}
         >
           <h2 style={{ margin: "15px 0 ", color: "#2196f3" }}>
-            Add a new folder
+            {header}
           </h2>
           <div
             style={{ color: "#a9a9a9c9", fontSize: "23px", cursor: "pointer" }}
@@ -35,7 +34,8 @@ export const Modal = ({ handleAddFolder, setOpenModal }) => {
           </div>
         </div>
         <StyledLine />
-        <div className="modalContent" style={{ width: "89%" }}>
+        {children}
+        {/* <div className="modalContent" style={{ width: "89%" }}>
           <h3 style={{ margin: "0", marginTop: "10px" }}>Folder Name</h3>
           <TextField
             style={{ width: "100%", marginBottom: "10px" }}
@@ -52,7 +52,7 @@ export const Modal = ({ handleAddFolder, setOpenModal }) => {
             value={newFolder.description}
             onChange={(event) => handleInput(event, false)}
           />
-        </div>
+        </div> */}
 
         <div
           className="modalButtons"
@@ -60,7 +60,7 @@ export const Modal = ({ handleAddFolder, setOpenModal }) => {
         >
           <Button onClick={() => setOpenModal(false)}>Cancel</Button>
           <Button
-            onClick={() => handleAddFolder(newFolder)}
+            onClick={() => handleAdd(newObject)}
             style={{
               backgroundColor: "#2196f3",
               color: "white",

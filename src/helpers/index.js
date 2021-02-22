@@ -8,8 +8,8 @@ export const request = async (
 ) => {
   try {
     if (body) {
-      body = JSON.stringify(body);
-      headers["Content-type"] = "application/json";
+    body = JSON.stringify(body);
+    headers["Content-type"] = "application/json";
     }
     const response = await fetch(url, { method, body, headers });
     if (!response.ok) {

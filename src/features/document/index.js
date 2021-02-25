@@ -1,7 +1,7 @@
 import { request } from "../../helpers/index";
 
-const token =
-  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LWFkbWluMUBleGFtcGxlLm9yZyIsImlhdCI6MTYxNDAyMDQwOCwiZXhwIjoxNjE0MDI0MDA4fQ.Pyou6mRY0DIkkxHquZy07Idi8EamSDg4ovgAzJYardc";
+const token = localStorage.getItem("token");
+//   "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LWFkbWluMUBleGFtcGxlLm9yZyIsImlhdCI6MTYxNDAyOTMzOSwiZXhwIjoxNjE0MDMyOTM5fQ.B_FqIURc6GXlzQI4VEixRpYcP9EpYqYzZ60-gYPY_mA";
 export const getDocumentList = async () => {
   const url = "/documents";
   try {
@@ -56,19 +56,26 @@ export const getFileInfo = async (fileName) => {
 
 export const addFile = async (folder, newFile) => {
   const url = `/folders/${folder}/files?namespace=http://example.cz/Folder`;
+
   const formData = new FormData();
   formData.append("file", newFile);
-  formData.append("uri", "http://example.cz/File/filllle.html");
-  formData.append("name", "Name10");
+  formData.append("uri", "http://example.cz/File/testt.html");
+  formData.append("name", "Name17");
 
-  console.log(formData);
+  console.log(newFile);
+  formData.forEach(console.log);
+  console.log(url);
 
   try {
-    const file = await request(url, "POST", formData, {
-      Authorization: `Bearer ${token}`,
-      "Content-Type":
-        "multipart/form-data; boundary=<calculated when request is sent>",
-    });
+    const file = await request(
+      url,
+      "POST",
+      formData,
+      {
+        Authorization: `Bearer ${token}`,
+      },
+      "multipart/form-data; boundary=<calculated when request is sent>"
+    );
     console.log(file);
     return file;
   } catch (error) {

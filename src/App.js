@@ -5,8 +5,11 @@ import { Header } from "./components/Header";
 import { StyledApp, StyledDocumentTreeWrapper } from "./styled";
 import { Modal } from "./components/Modal";
 import { TextField } from "@material-ui/core";
+import { BrowserRouter } from "react-router-dom";
+import { Routes } from "./Routes";
 
 function App() {
+  // localStorage.setItem("token", "lala");
   const [documentTree, setDocumentTree] = useState([]);
 
   const [isOpenFolderModal, setOpenFolderModal] = useState(false);
@@ -15,11 +18,9 @@ function App() {
 
   const [folderId, setFolderId] = useState({});
   const [newFolder, setNewFolder] = useState({ name: "", description: "" });
-  const [file, setFile] = useState();
+  const [file, setFile] = useState(null);
   const [fileInfo, setFileInfo] = useState();
   const [isSelectedFile, setSelectedFile] = useState(false);
-
-  console.log(file);
 
   const handleInput = (event, isName) => {
     isName
@@ -84,96 +85,129 @@ function App() {
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
+    console.log(file);
 
     setFile(file);
     setSelectedFile(true);
   };
 
-  if (documentTree.length === 0) {
-    return <div>Loading...</div>;
-  }
+  // if (documentTree.length === 0) {
+  //   return <div>Loading...</div>;
+  // }
+
+  console.log(documentTree);
 
   return (
-    <StyledApp>
-      <Header />
-      <h1 style={{ marginLeft: "10%" }}>Directories</h1>
-      {isOpenFolderModal && (
-        <Modal
-          handleAdd={handleAddFolder}
-          setOpenModal={setOpenFolderModal}
-          newObject={newFolder}
-          header="Add a new folder"
-        >
-          <div className="modalContent" style={{ width: "89%" }}>
-            <h3 style={{ margin: "0", marginTop: "10px" }}>Folder Name</h3>
-            <TextField
-              style={{ width: "100%", marginBottom: "10px" }}
-              id="standard-basic"
-              // label="Folder Name"
-              value={newFolder.name}
-              onChange={(event) => handleInput(event, true)}
-            />
-            <h3 style={{ margin: "0" }}>Folder Description</h3>
-            <TextField
-              style={{ width: "100%" }}
-              id="standard-basic"
-              // label="Folder Description"
-              value={newFolder.description}
-              onChange={(event) => handleInput(event, false)}
-            />
+      <StyledApp>
+        <Header isAuthorized={localStorage.getItem("token") !== null} />
+        {localStorage.getItem("token") === null && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+              marginTop: "80px",
+            }}
+          >
+            <h1>Welcome to document manager</h1>
+            <h2>
+              Please,{" "}
+              <a href="https://kbss.felk.cvut.cz/authorization-service/?tenant=http://example.org/tenants/document-manager&redirectTo=http://localhost:3000/auth">
+                log in
+              </a>
+            </h2>
           </div>
-        </Modal>
-      )}
+        )}
 
-      {isOpenFileModal && (
-        <Modal
-          handleAdd={handleAddFile}
-          setOpenModal={setOpenFileModal}
-          header="Add a new file"
-          // newObject={newFile}
-        >
-          <input
-            type="file"
-            name="file"
-            onChange={handleFileUpload}
-            style={{ marginTop: "10px" }}
-          />
-          {isSelectedFile ? (
-            <div>
-              <p>Filename: {file.name}</p>
-              <p>Filetype: {file.type}</p>
-              <p>Size in bytes: {file.size}</p>
-              <p>
-                lastModifiedDate: {file.lastModifiedDate.toLocaleDateString()}
-              </p>
-            </div>
-          ) : (
-            <p>Select a file to show details</p>
-          )}
-        </Modal>
-      )}
+        {localStorage.getItem("token") && (
+          <div>
+            <h1 style={{ marginLeft: "10%" }}>Directories</h1>
+            {isOpenFolderModal && (
+              <Modal
+                handleAdd={handleAddFolder}
+                setOpenModal={setOpenFolderModal}
+                newObject={newFolder}
+                header="Add a new folder"
+              >
+                <div className="modalContent" style={{ width: "89%" }}>
+                  <h3 style={{ margin: "0", marginTop: "10px" }}>
+                    Folder Name
+                  </h3>
+                  <TextField
+                    style={{ width: "100%", marginBottom: "10px" }}
+                    id="standard-basic"
+                    // label="Folder Name"
+                    value={newFolder.name}
+                    onChange={(event) => handleInput(event, true)}
+                  />
+                  <h3 style={{ margin: "0" }}>Folder Description</h3>
+                  <TextField
+                    style={{ width: "100%" }}
+                    id="standard-basic"
+                    // label="Folder Description"
+                    value={newFolder.description}
+                    onChange={(event) => handleInput(event, false)}
+                  />
+                </div>
+              </Modal>
+            )}
 
-      {isOpenFileInfoModal && (
-        <Modal setOpenModal={setOpenFileInfoModal} header="File information">
-          {console.log(fileInfo)}
-          <div>File name: {fileInfo["http://example.cz/fileName"]}</div>
-          <div>File type: {fileInfo["http://example.cz/fileType"]}</div>
-          <div>File version: {fileInfo["http://example.cz/version"]}</div>
-        </Modal>
-      )}
+            {isOpenFileModal && (
+              <Modal
+                handleAdd={handleAddFile}
+                setOpenModal={setOpenFileModal}
+                header="Add a new file"
+                // newObject={newFile}
+              >
+                <input
+                  type="file"
+                  name="file"
+                  onChange={handleFileUpload}
+                  style={{ marginTop: "10px" }}
+                />
+                {isSelectedFile ? (
+                  <div>
+                    <p>Filename: {file.name}</p>
+                    <p>Filetype: {file.type}</p>
+                    <p>Size in bytes: {file.size}</p>
+                    <p>
+                      lastModifiedDate:{" "}
+                      {file.lastModifiedDate.toLocaleDateString()}
+                    </p>
+                  </div>
+                ) : (
+                  <p>Select a file to show details</p>
+                )}
+              </Modal>
+            )}
 
-      <StyledDocumentTreeWrapper>
-        <FolderList
-          list={documentTree}
-          setOpenFolderModal={setOpenFolderModal}
-          setOpenFileModal={setOpenFileModal}
-          setOpenFileInfoModal={setOpenFileInfoModal}
-          setFolderId={setFolderId}
-          setFileInfo={setFileInfo}
-          isRoot={true}
-        />
-      </StyledDocumentTreeWrapper>
-    </StyledApp>
+            {isOpenFileInfoModal && (
+              <Modal
+                setOpenModal={setOpenFileInfoModal}
+                header="File information"
+              >
+                {console.log(fileInfo)}
+                <div>File name: {fileInfo["http://example.cz/fileName"]}</div>
+                <div>File type: {fileInfo["http://example.cz/fileType"]}</div>
+                <div>File version: {fileInfo["http://example.cz/version"]}</div>
+              </Modal>
+            )}
+
+            <StyledDocumentTreeWrapper>
+              <FolderList
+                list={documentTree}
+                setOpenFolderModal={setOpenFolderModal}
+                setOpenFileModal={setOpenFileModal}
+                setOpenFileInfoModal={setOpenFileInfoModal}
+                setFolderId={setFolderId}
+                setFileInfo={setFileInfo}
+                isRoot={true}
+              />
+            </StyledDocumentTreeWrapper>
+          </div>
+        )}
+      </StyledApp>
   );
 }
 

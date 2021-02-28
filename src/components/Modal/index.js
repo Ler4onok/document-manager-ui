@@ -6,6 +6,7 @@ export const Modal = ({
   handleAdd,
   setOpenModal,
   children,
+  
   newObject,
   header,
 }) => {
@@ -60,7 +61,7 @@ export const Modal = ({
         >
           <Button onClick={() => setOpenModal(false)}>Cancel</Button>
           <Button
-            onClick={() => handleAdd(newObject)}
+            onClick={() => handleAdd( newObject)}
             style={{
               backgroundColor: "#2196f3",
               color: "white",

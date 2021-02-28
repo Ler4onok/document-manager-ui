@@ -19,6 +19,9 @@ import addFolderIcon from "./assets/add_folder.svg";
 import addFileIcon from "./assets/add_file.svg";
 import deleteFolderIcon from "./assets/delete_folder.svg";
 import getFileInfoIcon from "./assets/info.svg";
+import folderIcon from "./assets/folder_simple.svg";
+import fileIcon from "./assets/file_simple.svg";
+import editIcon from "./assets/edit.svg";
 import { Modal } from "../Modal";
 
 const FolderItemWrapper = styled(animated.div)``;
@@ -28,6 +31,8 @@ const FolderList = ({
   setOpenFolderModal,
   setOpenFileModal,
   setOpenFileInfoModal,
+  newFolder,
+  setNewFolder,
   setFolderId,
   setFileInfo,
   isRoot = false,
@@ -43,6 +48,8 @@ const FolderList = ({
           setOpenFolderModal={setOpenFolderModal}
           setOpenFileModal={setOpenFileModal}
           setOpenFileInfoModal={setOpenFileInfoModal}
+          newFolder={newFolder}
+          setNewFolder={setNewFolder}
           setFolderId={setFolderId}
           setFileInfo={setFileInfo}
         />
@@ -57,6 +64,8 @@ const FolderItem = ({
   setOpenFolderModal,
   setOpenFileModal,
   setOpenFileInfoModal,
+  newFolder,
+  setNewFolder,
   setFolderId,
   setFileInfo,
 }) => {
@@ -64,20 +73,23 @@ const FolderItem = ({
   const [isOpen, setOpen] = useState(false);
   const [_opacity, setOpacity] = useState(0);
 
-  const { height, opacity, transform } = useSpring({
-    from: { height: 0, opacity: 0, transform: "translate3d(20px,0,0)" },
+  const { opacity, transform } = useSpring({
+    from: { opacity: 0, transform: "translate3d(20px,0,0)" },
     to: {
-      height:
-        isRoot && isOpen
-          ? "auto"
-          : isOpen
-          ? (folderContent.length + 1) * 25 + folderContent.length * 15
-          : 25,
+      // height:
+      //   isRoot && isOpen
+      //     ? "auto"
+      //     : isOpen
+      //     ? (folderContent.length + 1) * 25 + folderContent.length * 15
+      //     : 25,
       opacity: 1,
       transform: `translate3d(0px,0,0)`,
     },
     config: config.stiff,
   });
+
+  // console.log(height.startPosition);
+  // console.log(folderContent.length);
 
   //part 1 - type of the file, part 2 - name of the file
   function getLinkInfo(link, part) {
@@ -86,10 +98,14 @@ const FolderItem = ({
   }
 
   const getSubfolderList = async () => {
-    const folderId = folder["@id"].replace(
-      `http://example.cz/${isRoot ? "Document" : "Folder"}/`,
-      ""
-    );
+    // const folderId = folder["@id"].replace(
+    //   `http://example.cz/${isRoot ? "Document" : "Folder"}/`,
+    //   ""
+    // );
+
+    console.log("lalalall");
+
+    const folderId = getLinkInfo(folder["@id"], 2);
 
     const url = `folders/${folderId}${
       isRoot ? "_root" : ""
@@ -97,20 +113,21 @@ const FolderItem = ({
 
     try {
       const _subfolderList = await getSubfolders(url);
-      console.log(_subfolderList);
       return _subfolderList;
     } catch (error) {
       console.error(error);
     }
   };
 
-  const getFilesList = async () => {
+  const getFilesList = async (isRoot) => {
     const folderId = folder["@id"].replace(
       `http://example.cz/${isRoot ? "Document" : "Folder"}/`,
       ""
     );
 
-    const url = `folders/${folderId}/files?namespace=http://example.cz/Folder`;
+    const url = `folders/${folderId}${
+      isRoot ? "_root" : ""
+    }//files?namespace=http://example.cz/Folder`;
 
     try {
       const _filesList = await getFiles(url);
@@ -128,12 +145,10 @@ const FolderItem = ({
 
       let files = [];
 
-      if (!isRoot) {
-        files = await getFilesList();
-      }
-      // console.log("files");
-      // console.log(subfolders.concat(files));
-      // console.log(getLinkType(subfolders.concat(files)[0]["@id"]));
+      files = await getFilesList(isRoot);
+
+      console.log(subfolders);
+      console.log(files);
       setFolderContent(subfolders.concat(files));
     } catch (error) {
       console.log(error);
@@ -189,16 +204,25 @@ const FolderItem = ({
   };
 
   const hasChildren = isOpen && folderContent.length > 0;
-
+  console.log(folder);
   return (
     <div>
       <StyledFolderItem
-        style={{ height, opacity, transform }}
+        style={{ opacity, transform }}
         isOpen={hasChildren}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
         <div style={{ display: "flex" }}>
+          {(getLinkInfo(folder["@id"], 1) === "Folder" ||
+            getLinkInfo(folder["@id"], 1) === "Document") && (
+            <StyledIcon src={folderIcon} />
+          )}
+
+          {getLinkInfo(folder["@id"], 1) === "File" && (
+            <StyledIcon src={fileIcon} />
+          )}
+
           <div onClick={onOpenFolder}>{folder["http://example.cz/name"]}</div>
           {(getLinkInfo(folder["@id"], 1) === "Folder" ||
             getLinkInfo(folder["@id"], 1) === "Document") && (
@@ -207,16 +231,20 @@ const FolderItem = ({
                 src={addFolderIcon}
                 onClick={() => {
                   setOpenFolderModal(true);
+                  setNewFolder({ ...newFolder, type: "Folder" });
                   setFolderId({ id: folder["@id"], isRoot: isRoot });
                 }}
               />
               <StyledIcon
                 src={addFileIcon}
                 onClick={() => {
-                  setFolderId({ id: folder["@id"], isRoot: isRoot });
                   setOpenFileModal(true);
+                  setNewFolder({ ...newFolder, type: "File" });
+                  setFolderId({ id: folder["@id"], isRoot: isRoot });
                 }}
               />
+
+              <StyledIcon src={editIcon} />
               <StyledIcon
                 src={deleteFolderIcon}
                 onClick={() => handleDeleteFolder()}
@@ -233,12 +261,12 @@ const FolderItem = ({
                     getLinkInfo(folder["@id"], 2)
                   );
                   setFileInfo(fileInfo);
-                  console.log("ighjhgjhgjhgb");
 
                   console.log(fileInfo);
                   setOpenFileInfoModal(true);
                 }}
               />
+              <StyledIcon src={editIcon} />
               <StyledIcon
                 src={deleteFolderIcon}
                 onClick={() => handleDeleteFolder()}
@@ -252,6 +280,8 @@ const FolderItem = ({
             setOpenFolderModal={setOpenFolderModal}
             setOpenFileModal={setOpenFileModal}
             setOpenFileInfoModal={setOpenFileInfoModal}
+            newFolder={newFolder}
+            setNewFolder={setNewFolder}
             setFolderId={setFolderId}
             setFileInfo={setFileInfo}
           />

@@ -9,15 +9,14 @@ export const request = async (
 ) => {
   try {
     headers["Content-Type"] = contentType;
-
-    // if (body) {
-    //   body = JSON.stringify(body);
-    // }
+    if (body) {
+      body = JSON.stringify(body);
+    }
     // if (type === "folder") {
     // } else {
     // headers["Content-type"] =
     // "multipart/form-data";
-    
+
     // }
     const response = await fetch(url, { method, body, headers });
     if (!response.ok) {

@@ -8,6 +8,7 @@ export const StyledApp = styled.div`
 `;
 
 export const StyledDocumentTreeWrapper = styled.div`
+  position: relative;
   background: white;
   border-radius: 6px;
   width: 80%;
@@ -16,3 +17,10 @@ export const StyledDocumentTreeWrapper = styled.div`
   box-shadow: rgb(189, 189, 189) 5px 5px 10px -1px;
 `;
 
+export const StyledIcon = styled.img`
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  right: 30px;
+  cursor: pointer;
+`;

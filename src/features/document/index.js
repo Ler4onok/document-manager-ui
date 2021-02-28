@@ -1,8 +1,7 @@
 import { request } from "../../helpers/index";
 
-const token = localStorage.getItem("token");
-//   "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LWFkbWluMUBleGFtcGxlLm9yZyIsImlhdCI6MTYxNDAyOTMzOSwiZXhwIjoxNjE0MDMyOTM5fQ.B_FqIURc6GXlzQI4VEixRpYcP9EpYqYzZ60-gYPY_mA";
 export const getDocumentList = async () => {
+  const token = localStorage.getItem("token");
   const url = "/documents";
   try {
     const documentList = await request(url, "GET", null, {
@@ -16,6 +15,9 @@ export const getDocumentList = async () => {
 };
 
 export const getSubfolders = async (url) => {
+  const token = localStorage.getItem("token");
+  console.log("get subfolders");
+  console.log(url);
   try {
     const subfoldersList = await request(url, "GET", null, {
       Authorization: `Bearer ${token}`,
@@ -28,6 +30,8 @@ export const getSubfolders = async (url) => {
 };
 
 export const getFiles = async (url) => {
+  const token = localStorage.getItem("token");
+
   try {
     const files = await request(url, "GET", null, {
       Authorization: `Bearer ${token}`,
@@ -40,6 +44,8 @@ export const getFiles = async (url) => {
 };
 
 export const getFileInfo = async (fileName) => {
+  const token = localStorage.getItem("token");
+
   const url = `/files/${fileName}?namespace=http://example.cz/File`;
   try {
     const fileInfo = await request(url, "GET", null, {
@@ -55,6 +61,8 @@ export const getFileInfo = async (fileName) => {
 };
 
 export const addFile = async (folder, newFile) => {
+  const token = localStorage.getItem("token");
+
   const url = `/folders/${folder}/files?namespace=http://example.cz/Folder`;
 
   const formData = new FormData();
@@ -87,17 +95,20 @@ export const addFolder = async (
   type,
   name,
   description,
-  parentFolderId,
-  isRoot
+  isRoot,
+  parentFolderId = null
 ) => {
+  const token = localStorage.getItem("token");
+
   const uriName = name.trim().replace(/\s/g, "");
   const typpe =
-    type === "Folder"
-      ? `folders/${parentFolderId}${
+    type === "Document"
+      ? "documents/"
+      : `folders/${parentFolderId}${
           isRoot ? "_root" : ""
-        }/subfolders?namespace=http://example.cz/Folder`
-      : "documents/";
-  console.log(typpe);
+        }/subfolders?namespace=http://example.cz/Folder`;
+
+  console.log(type);
   try {
     const folder = await request(
       `${typpe}`,
@@ -119,6 +130,8 @@ export const addFolder = async (
 };
 
 export const deleteFolder = async (folderId, isRoot) => {
+  const token = localStorage.getItem("token");
+
   const url = isRoot
     ? `documents/${folderId}?namespace=http://example.cz/Document`
     : `folders/${folderId}?namespace=http://example.cz/Folder`;

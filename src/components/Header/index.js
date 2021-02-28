@@ -2,10 +2,13 @@ import React from "react";
 import { SearchField } from "../SearchField";
 import { HeaderWrap, HeaderRightBlock } from "./styled";
 
-export const Header = ({ isAuthorized }) => {
+export const Header = ({ isAuthorized}) => {
   return (
     <HeaderWrap>
-      <div style={{ fontWeight: "900", fontSize: "22px" }}>
+      <div
+        style={{ fontWeight: "900", fontSize: "22px", cursor: "pointer" }}
+       
+      >
         Document Manager
       </div>
       <HeaderRightBlock>
@@ -19,7 +22,10 @@ export const Header = ({ isAuthorized }) => {
                 fontWeight: "400",
                 cursor: "pointer",
               }}
-              onClick={() => localStorage.removeItem("token")}
+              onClick={() => {
+                localStorage.removeItem("token");
+                window.location.reload();
+              }}
             >
               Log out
             </div>
@@ -28,12 +34,14 @@ export const Header = ({ isAuthorized }) => {
 
         {!isAuthorized && (
           <a
-            href="https://kbss.felk.cvut.cz/authorization-service/?tenant=http://example.org/tenants/document-manager&redirectTo=http://localhost:8080/document-manager"
+            href="https://kbss.felk.cvut.cz/authorization-service/?tenant=http://example.org/tenants/document-manager&redirectTo=http://localhost:3000/auth"
             style={{
               marginLeft: "25px",
               fontSize: "17px",
               fontWeight: "400",
-              // cursor: "pointer",
+              textDecoration: "none",
+              cursor: "pointer",
+              color: "white",
             }}
           >
             Log in

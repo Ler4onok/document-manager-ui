@@ -14,7 +14,10 @@ export const StyledDocumentTreeWrapper = styled.div`
   width: 80%;
   padding: 30px;
   margin-left: 10%;
-  box-shadow: rgb(189, 189, 189) 5px 5px 10px -1px;
+  box-shadow: rgb(189 189 189) 5px 5px 10px -1px;
+  overflow: scroll;
+  height: 450px;
+  overflow-x: hidden;
 `;
 
 export const StyledIcon = styled.img`

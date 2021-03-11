@@ -20,12 +20,15 @@ export const request = async (
     // }
     const response = await fetch(url, { method, body, headers });
     if (!response.ok) {
-      throw new Error("Something went wrong");
+      return Promise.reject({
+        statusCode: response.status,
+        statusText: response.statusText,
+      });
     }
     const data = await response.json();
     return data;
   } catch (error) {
     console.log(`Request failed. Reason: ${error}`);
-    throw error;
+    return Promise.reject(error);
   }
 };

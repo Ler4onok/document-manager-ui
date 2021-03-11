@@ -35,6 +35,7 @@ const FolderList = ({
   setNewFolder,
   setFolderId,
   setFileInfo,
+  setModifierModal,
   isRoot = false,
 }) => {
   console.log(list);
@@ -52,6 +53,7 @@ const FolderList = ({
           setNewFolder={setNewFolder}
           setFolderId={setFolderId}
           setFileInfo={setFileInfo}
+          setModifierModal={setModifierModal}
         />
       ))}
     </div>
@@ -68,6 +70,7 @@ const FolderItem = ({
   setNewFolder,
   setFolderId,
   setFileInfo,
+  setModifierModal,
 }) => {
   const [folderContent, setFolderContent] = useState([]);
   const [isOpen, setOpen] = useState(false);
@@ -142,13 +145,7 @@ const FolderItem = ({
   const getFolderContent = async () => {
     try {
       const subfolders = await getSubfolderList();
-
-      let files = [];
-
-      files = await getFilesList(isRoot);
-
-      console.log(subfolders);
-      console.log(files);
+      const files = await getFilesList(isRoot);
       setFolderContent(subfolders.concat(files));
     } catch (error) {
       console.log(error);
@@ -204,7 +201,7 @@ const FolderItem = ({
   };
 
   const hasChildren = isOpen && folderContent.length > 0;
-  console.log(folder);
+  // console.log(folder);
   return (
     <div>
       <StyledFolderItem
@@ -230,8 +227,9 @@ const FolderItem = ({
               <StyledIcon
                 src={addFolderIcon}
                 onClick={() => {
+                  setModifierModal({ addModal: { isOpen: true } });
                   setOpenFolderModal(true);
-                  setNewFolder({ ...newFolder, type: "Folder" });
+                  setNewFolder({ ...newFolder, type: "Folder", event: 'add' });
                   setFolderId({ id: folder["@id"], isRoot: isRoot });
                 }}
               />
@@ -239,12 +237,19 @@ const FolderItem = ({
                 src={addFileIcon}
                 onClick={() => {
                   setOpenFileModal(true);
-                  setNewFolder({ ...newFolder, type: "File" });
+                  setNewFolder({ ...newFolder, type: "File", event: 'add' });
                   setFolderId({ id: folder["@id"], isRoot: isRoot });
                 }}
               />
 
-              <StyledIcon src={editIcon} />
+              <StyledIcon
+                src={editIcon}
+                onClick={() => {
+                  setOpenFolderModal(true);
+                  setNewFolder({ ...newFolder, type: getLinkInfo(folder["@id"], 1), event: 'edit'});
+                  setFolderId({ id: folder["@id"], isRoot: isRoot });
+                }}
+              />
               <StyledIcon
                 src={deleteFolderIcon}
                 onClick={() => handleDeleteFolder()}
@@ -284,6 +289,7 @@ const FolderItem = ({
             setNewFolder={setNewFolder}
             setFolderId={setFolderId}
             setFileInfo={setFileInfo}
+            setModifierModal={setModifierModal}
           />
         )}
       </StyledFolderItem>

@@ -1,17 +1,14 @@
-import { Button, TextField } from "@material-ui/core";
-import React, { useEffect, useState } from "react";
+import { Button } from "@material-ui/core";
+import React from "react";
 import { StyledModal, StyledModalContainer, StyledLine } from "./styled";
 
 export const Modal = ({
-  handleAdd,
+  handleSubmit,
   setOpenModal,
   children,
-  
   newObject,
   header,
 }) => {
-  // console.log(isOpenModal);
-
   return (
     <StyledModalContainer>
       <StyledModal>
@@ -24,9 +21,7 @@ export const Modal = ({
             alignItems: "center",
           }}
         >
-          <h2 style={{ margin: "15px 0 ", color: "#2196f3" }}>
-            {header}
-          </h2>
+          <h2 style={{ margin: "15px 0 ", color: "#2196f3" }}>{header}</h2>
           <div
             style={{ color: "#a9a9a9c9", fontSize: "23px", cursor: "pointer" }}
             onClick={() => setOpenModal(false)}
@@ -36,32 +31,13 @@ export const Modal = ({
         </div>
         <StyledLine />
         {children}
-        {/* <div className="modalContent" style={{ width: "89%" }}>
-          <h3 style={{ margin: "0", marginTop: "10px" }}>Folder Name</h3>
-          <TextField
-            style={{ width: "100%", marginBottom: "10px" }}
-            id="standard-basic"
-            // label="Folder Name"
-            value={newFolder.name}
-            onChange={(event) => handleInput(event, true)}
-          />
-          <h3 style={{ margin: "0" }}>Folder Description</h3>
-          <TextField
-            style={{ width: "100%" }}
-            id="standard-basic"
-            // label="Folder Description"
-            value={newFolder.description}
-            onChange={(event) => handleInput(event, false)}
-          />
-        </div> */}
-
         <div
           className="modalButtons"
           style={{ margin: "25px 0 15px 0", width: "89%", textAlign: "right" }}
         >
           <Button onClick={() => setOpenModal(false)}>Cancel</Button>
           <Button
-            onClick={() => handleAdd( newObject)}
+            onClick={() => handleSubmit(newObject)}
             style={{
               backgroundColor: "#2196f3",
               color: "white",

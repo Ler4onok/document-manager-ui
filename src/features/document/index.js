@@ -1,5 +1,6 @@
 import { request } from "../../helpers/index";
 
+// GET
 export const getDocumentList = async () => {
   const token = localStorage.getItem("token");
   const url = "/documents";
@@ -60,6 +61,7 @@ export const getFileInfo = async (fileName) => {
   }
 };
 
+// POST
 export const addFile = async (folder, newFile) => {
   const token = localStorage.getItem("token");
 
@@ -126,9 +128,43 @@ export const addFolder = async (
     return folder;
   } catch (error) {
     console.log(error);
+    throw error;
+    // console.log('such folder exists')
+    // console.log(error);
   }
 };
 
+// PUT
+
+export const update = async (url, id, newEntity) => {
+  console.log(id);
+  console.log(newEntity);
+  const token = localStorage.getItem('token');
+
+  try{
+    await request(url, 'PUT', {
+      "@id": `http://example.cz/${newEntity.type}/${id}`,
+      "@type": [
+          `http://example.cz/${newEntity.type}`,
+          "http://example.cz/Node"
+      ],
+      "http://example.cz/name": `${newEntity.name}`,
+      "http://example.cz/description": `${newEntity.description}`
+  },
+   {
+      Authorization: `Bearer ${token}`,
+    }, 'application/ld+json')
+  } catch(error){
+    throw error;
+  }
+
+
+}
+
+
+
+
+// DELETE
 export const deleteFolder = async (folderId, isRoot) => {
   const token = localStorage.getItem("token");
 

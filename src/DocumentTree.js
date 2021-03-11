@@ -4,14 +4,14 @@ import {
   addFolder,
   getDocumentList,
   getFiles,
+  update
 } from "./features/document/index";
 import { FolderList } from "./components/DocumentTree";
+import { FullModal } from "./components/FullModal";
 import { Header } from "./components/Header";
 import { StyledApp, StyledDocumentTreeWrapper, StyledIcon } from "./styled";
 import { Modal } from "./components/Modal";
 import { TextField } from "@material-ui/core";
-import { BrowserRouter } from "react-router-dom";
-import { Routes } from "./Routes";
 import plusIcon from "./assets/plus_blue.svg";
 
 function DocumentTree() {
@@ -26,11 +26,19 @@ function DocumentTree() {
     name: "",
     description: "",
     type: "",
+    event: ''
   });
 
   const [file, setFile] = useState(null);
   const [fileInfo, setFileInfo] = useState();
   const [isSelectedFile, setSelectedFile] = useState(false);
+
+  const [modifierModal, setModifierModal] = useState({
+    editModal: { isOpen: false },
+    addModal: { isOpen: false },
+  });
+
+  const [error, setError] = useState(null);
 
   const handleInput = (event, isName) => {
     isName
@@ -92,15 +100,34 @@ function DocumentTree() {
           parentFolderName
         );
         console.log(newF);
+        setError(null);
         setOpenFolderModal(false);
       } catch (e) {
+        setError("Such folder exists. Change the name, please");
         console.log("Cannot add a folder. Reason: " + e);
       }
-    }
-
-    // const newFolder = await addFolder("Document", name);
-    // console.log(newFolder);
+    } 
   };
+
+  const getEndpointInfo = (entityType) => {
+    switch(entityType){
+      case('Document'):
+        return 'documents';
+      case('Folder'):
+        return 'folders';
+      default:
+        return 'files'
+    }   
+  }
+
+
+
+  const handleUpdate = async () => {
+    const id = getLinkName(folderId, 2);
+    const reqType = getEndpointInfo(newFolder.type);
+    const url = `${reqType}/${id}?namespace=http://example.cz/${newFolder.type}`
+    await update(url, id, newFolder);
+  }
 
   const handleAddFile = async () => {
     console.log(folderId);
@@ -110,11 +137,10 @@ function DocumentTree() {
     try {
       const _file = await addFile(parentFolderName, file);
       console.log(_file);
+      setOpenFileModal(false);
     } catch (e) {
       console.log("Cannot add a folder. Reason: " + e);
     }
-
-    setOpenFolderModal(false);
   };
 
   const handleFileUpload = (event) => {
@@ -159,7 +185,7 @@ function DocumentTree() {
           <h1 style={{ marginLeft: "10%" }}>Directories</h1>
           {isOpenFolderModal && (
             <Modal
-              handleAdd={handleAddFolder}
+              handleSubmit={newFolder.event === 'add'? handleAddFolder: handleUpdate}
               setOpenModal={setOpenFolderModal}
               newObject={newFolder}
               header={`Add a new ${newFolder.type.toLowerCase()}`}
@@ -183,6 +209,7 @@ function DocumentTree() {
                   value={newFolder.description}
                   onChange={(event) => handleInput(event, false)}
                 />
+                {error != null && <div style={{ color: "red" }}>{error}</div>}
               </div>
             </Modal>
           )}
@@ -247,6 +274,7 @@ function DocumentTree() {
               setNewFolder={setNewFolder}
               setFolderId={setFolderId}
               setFileInfo={setFileInfo}
+              setModifierModal={setModifierModal}
               isRoot={true}
             />
           </StyledDocumentTreeWrapper>

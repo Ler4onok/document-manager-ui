@@ -19,7 +19,7 @@ export const StyledModal = styled.div`
   align-items: center;
   justify-content: center;
   background: white;
-  width: 30%;
+  width: 40%;
   border-radius: 5px;
   /* padding: 10px 80px; */
 `;

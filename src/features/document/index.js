@@ -61,32 +61,66 @@ export const getFileInfo = async (fileName) => {
   }
 };
 
+export const getFileVersions = async (fileName) => {
+  const token = localStorage.getItem('token');
+  const url = `/files/${fileName}/versions?namespace=http://example.cz/File`
+  try{
+    const fileVersions = await request(url, 'GET', null,  {
+      Authorization: `Bearer ${token}`,
+    })
+    return fileVersions;
+  }
+  catch(error){
+    throw(error);
+  }
+}
+
+export const getFileContent = async (fileName, version) => {
+ const token = localStorage.getItem('token');
+ const url = version?  `/files/${fileName}/content/${version}?namespace=http://example.cz/File` :`/files/${fileName}/content?namespace=http://example.cz/File`
+  try{
+    const fileContent = await request(url, 'GET', null,  {
+      Authorization: `Bearer ${token}`,
+    })
+    
+    return fileContent;
+  }
+  catch(error){
+    return error;
+  }
+
+}
+
 // POST
-export const addFile = async (folder, newFile) => {
+export const addFile = async (entityType, folder, newFile, fileName) => {
   const token = localStorage.getItem("token");
 
-  const url = `/folders/${folder}/files?namespace=http://example.cz/Folder`;
+  const url = `${entityType.toLowerCase()}s/${folder}/files?namespace=http://example.cz/${entityType}`;
 
   const formData = new FormData();
+  
   formData.append("file", newFile);
-  formData.append("uri", "http://example.cz/File/testt.html");
-  formData.append("name", "Name17");
+  formData.append("uri", `http://example.cz/File/${fileName}.html`);
+  formData.append("name", fileName);
 
-  console.log(newFile);
-  formData.forEach(console.log);
-  console.log(url);
+  // formData.forEach(console.log);
+  // console.log(url);
 
+  // for (let [key, value] of formData.entries()) {
+  //   console.log(`${key}: ${value}`);
+  // }
+
+  
   try {
     const file = await request(
       url,
       "POST",
-      formData,
+     formData,
       {
         Authorization: `Bearer ${token}`,
       },
-      "multipart/form-data; boundary=<calculated when request is sent>"
+     true
     );
-    console.log(file);
     return file;
   } catch (error) {
     console.log(error);
@@ -122,6 +156,7 @@ export const addFolder = async (
       },
       {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     );
     console.log(request);
@@ -133,6 +168,29 @@ export const addFolder = async (
     // console.log(error);
   }
 };
+
+export const addUserPermission =  (documentId, permissionLevel, userURI) => {
+  const token = localStorage.getItem('token');
+
+  const url = `documents/${documentId}/permissions/user?namespace=http://example.cz/Document`
+
+  try{
+     request(url, 'POST', 
+    {
+      "permissionLevel": `${permissionLevel}`,
+      "userURI": `http://example.org/users/${userURI}`
+  }, 
+  {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+  )
+  }
+   catch(error){
+    throw(error);
+  }
+  
+}
 
 // PUT
 
@@ -153,11 +211,28 @@ export const update = async (url, id, newEntity) => {
   },
    {
       Authorization: `Bearer ${token}`,
-    }, 'application/ld+json')
+      'Content-Type': 'application/ld+json'
+    })
   } catch(error){
     throw error;
   }
+}
 
+
+export const updateFile =  (newfile, fileName, updateType) => {
+  const token = localStorage.getItem('token');
+  const url = `files/${fileName}/${updateType}?namespace=http://example.cz/File`;
+
+  const formData = new FormData();
+  formData.append("file", newfile);
+
+  try {
+    return  request(url, "PUT", formData, {
+      Authorization: `Bearer ${token}`,
+    }, true);
+  } catch (error) {
+    throw error;
+  }
 
 }
 
@@ -176,8 +251,19 @@ export const deleteFolder = async (folderId, isRoot) => {
       Authorization: `Bearer ${token}`,
     });
   } catch (error) {
-    console.log(
-      `Something went whong while deletion a folder. Reason: ${error}`
-    );
+    throw error;
   }
 };
+
+export const deleteFile = async (fileName) => {
+  const token = localStorage.getItem("token");
+  const url = `files/${fileName}?namespace=http://example.cz/File`
+
+  try {
+    return await request(url, "DELETE", null, {
+      Authorization: `Bearer ${token}`,
+    });
+  } catch (error) {
+   throw error;
+  }
+}

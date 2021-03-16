@@ -1,6 +1,6 @@
-import { Button } from "@material-ui/core";
 import React from "react";
 import { StyledModal, StyledModalContainer, StyledLine } from "./styled";
+import Button from '@material-ui/core/Button';
 
 export const Modal = ({
   handleSubmit,
@@ -35,14 +35,14 @@ export const Modal = ({
           className="modalButtons"
           style={{ margin: "25px 0 15px 0", width: "89%", textAlign: "right" }}
         >
-          <Button onClick={() => setOpenModal(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => setOpenModal(false)}>Cancel</Button>
           <Button
+          variant="contained" color="primary"
             onClick={() => handleSubmit(newObject)}
             style={{
-              backgroundColor: "#2196f3",
-              color: "white",
+              marginLeft: '10px',
               padding: " 7px 15px",
-              borderRadius: "5px",
+              background: "#2196f3"
             }}
           >
             Submit

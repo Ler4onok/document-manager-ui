@@ -8,6 +8,7 @@ import {
   addFolder,
   getFiles,
   getFileInfo,
+  getFileContent, deleteFile
 } from "../../features/document";
 import {
   StyledFolderItem,
@@ -22,6 +23,8 @@ import getFileInfoIcon from "./assets/info.svg";
 import folderIcon from "./assets/folder_simple.svg";
 import fileIcon from "./assets/file_simple.svg";
 import editIcon from "./assets/edit.svg";
+import downloadIcon from '../../assets/download.svg'
+
 import { Modal } from "../Modal";
 
 const FolderItemWrapper = styled(animated.div)``;
@@ -153,32 +156,13 @@ const FolderItem = ({
   };
 
   const handleDeleteFolder = async () => {
-    const folderId = folder["@id"].replace(
-      `http://example.cz/${isRoot ? "Document" : "Folder"}/`,
-      ""
-    );
-
-    console.log(folderId);
-    // console.log(folderId);
-    console.log(deleteFolder(folderId, isRoot));
-
-    // handleDeleteFolder(folderId);
+   await deleteFolder(getLinkInfo(folder["@id"], 2), isRoot);
   };
 
-  // const getFileInfo = async (fileName) => {
-  //   const fileInfo = getFileInfo
-  // };
+  const handleDeleteFile = async () => {
+    await deleteFile(getLinkInfo(folder["@id"], 2));
+  }
 
-  //UPDATE THE SUBFOLDER LIST AFTER DELETE
-  // const handleDeleteFolder = (folderId) => {
-  //   console.log({ folderId });
-  //   // console.log(folderContent);
-  //   const updatedSubfolderList = folderContent.filter(
-  //     (subfolder) => subfolder !== folderId
-  //   );
-  //   console.log(updatedSubfolderList);
-  //   setSubfolderList(updatedSubfolderList);
-  // };
 
   useEffect(() => {
     getFolderContent();
@@ -213,11 +197,11 @@ const FolderItem = ({
         <div style={{ display: "flex" }}>
           {(getLinkInfo(folder["@id"], 1) === "Folder" ||
             getLinkInfo(folder["@id"], 1) === "Document") && (
-            <StyledIcon src={folderIcon} />
+            <StyledIcon src={folderIcon}/>
           )}
 
           {getLinkInfo(folder["@id"], 1) === "File" && (
-            <StyledIcon src={fileIcon} />
+            <StyledIcon src={fileIcon}/>
           )}
 
           <div onClick={onOpenFolder}>{folder["http://example.cz/name"]}</div>
@@ -226,32 +210,36 @@ const FolderItem = ({
             <StyledIconWrapper opacity={_opacity}>
               <StyledIcon
                 src={addFolderIcon}
+                title='Add a new folder'
                 onClick={() => {
                   setModifierModal({ addModal: { isOpen: true } });
                   setOpenFolderModal(true);
-                  setNewFolder({ ...newFolder, type: "Folder", event: 'add' });
-                  setFolderId({ id: folder["@id"], isRoot: isRoot });
+                  setNewFolder({ ...newFolder, type: "Folder", event: 'Add' });
+                  setFolderId({ id: folder["@id"], name: folder['http://example.cz/name'], description: folder['http://example.cz/description'], isRoot: isRoot });
                 }}
               />
               <StyledIcon
                 src={addFileIcon}
+                title='Add a new file'
                 onClick={() => {
                   setOpenFileModal(true);
-                  setNewFolder({ ...newFolder, type: "File", event: 'add' });
-                  setFolderId({ id: folder["@id"], isRoot: isRoot });
+                  setNewFolder({ ...newFolder, type: "File", event: 'Add' });
+                  setFolderId({ id: folder["@id"],   name: folder['http://example.cz/name'], description: folder['http://example.cz/description'], isRoot: isRoot });
                 }}
               />
 
               <StyledIcon
                 src={editIcon}
+                title='Edit a folder'
                 onClick={() => {
                   setOpenFolderModal(true);
-                  setNewFolder({ ...newFolder, type: getLinkInfo(folder["@id"], 1), event: 'edit'});
-                  setFolderId({ id: folder["@id"], isRoot: isRoot });
+                  setNewFolder({name: folder['http://example.cz/name'] , description: folder['http://example.cz/description'],  type: getLinkInfo(folder["@id"], 1), event: 'Edit'});
+                  setFolderId({ id: folder["@id"], name: folder['http://example.cz/name'], description: folder['http://example.cz/description'], isRoot: isRoot });
                 }}
               />
               <StyledIcon
                 src={deleteFolderIcon}
+                title='Delete a folder'
                 onClick={() => handleDeleteFolder()}
               />
             </StyledIconWrapper>
@@ -261,20 +249,36 @@ const FolderItem = ({
             <StyledIconWrapper opacity={_opacity}>
               <StyledIcon
                 src={getFileInfoIcon}
+                title='Open file info'
                 onClick={async () => {
                   const fileInfo = await getFileInfo(
                     getLinkInfo(folder["@id"], 2)
                   );
                   setFileInfo(fileInfo);
 
-                  console.log(fileInfo);
+                  // console.log(fileInfo);
                   setOpenFileInfoModal(true);
                 }}
               />
-              <StyledIcon src={editIcon} />
+              <StyledIcon src={downloadIcon} title='Download a file'onClick={async ()=>{
+                const fileName = getLinkInfo(folder["@id"], 2);
+                const fileContent = await getFileContent(fileName);
+                const url = URL.createObjectURL(new Blob([fileContent]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute(
+                  'download',
+                  `${folder['http://example.cz/fileName']}`,
+                );
+            
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode.removeChild(link);
+              }}/>
               <StyledIcon
                 src={deleteFolderIcon}
-                onClick={() => handleDeleteFolder()}
+                title='Delete a file'
+                onClick={() => handleDeleteFile()}
               />
             </StyledIconWrapper>
           )}

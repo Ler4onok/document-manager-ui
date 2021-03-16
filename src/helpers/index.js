@@ -5,19 +5,12 @@ export const request = async (
   method = "GET",
   body = null,
   headers = {},
-  contentType = "application/json"
-) => {
+  isFile=false) => {
   try {
-    headers["Content-Type"] = contentType;
-    if (body) {
-      body = JSON.stringify(body);
-    }
-    // if (type === "folder") {
-    // } else {
-    // headers["Content-type"] =
-    // "multipart/form-data";
-
-    // }
+    if (!isFile){
+       if (body) {
+        body = JSON.stringify(body);
+    }}
     const response = await fetch(url, { method, body, headers });
     if (!response.ok) {
       return Promise.reject({

@@ -25,10 +25,6 @@ import fileIcon from "./assets/file_simple.svg";
 import editIcon from "./assets/edit.svg";
 import downloadIcon from '../../assets/download.svg'
 
-import { Modal } from "../Modal";
-
-const FolderItemWrapper = styled(animated.div)``;
-
 const FolderList = ({
   list,
   setOpenFolderModal,
@@ -212,7 +208,6 @@ const FolderItem = ({
                 src={addFolderIcon}
                 title='Add a new folder'
                 onClick={() => {
-                  setModifierModal({ addModal: { isOpen: true } });
                   setOpenFolderModal(true);
                   setNewFolder({ ...newFolder, type: "Folder", event: 'Add' });
                   setFolderId({ id: folder["@id"], name: folder['http://example.cz/name'], description: folder['http://example.cz/description'], isRoot: isRoot });
@@ -293,7 +288,6 @@ const FolderItem = ({
             setNewFolder={setNewFolder}
             setFolderId={setFolderId}
             setFileInfo={setFileInfo}
-            setModifierModal={setModifierModal}
           />
         )}
       </StyledFolderItem>

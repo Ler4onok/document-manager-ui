@@ -60,34 +60,33 @@ export const getFileInfo = async (fileName) => {
 };
 
 export const getFileVersions = async (fileName) => {
-  const token = localStorage.getItem('token');
-  const url = `/files/${fileName}/versions?namespace=http://example.cz/File`
-  try{
-    const fileVersions = await request(url, 'GET', null,  {
+  const token = localStorage.getItem("token");
+  const url = `/files/${fileName}/versions?namespace=http://example.cz/File`;
+  try {
+    const fileVersions = await request(url, "GET", null, {
       Authorization: `Bearer ${token}`,
-    })
+    });
     return fileVersions;
+  } catch (error) {
+    throw error;
   }
-  catch(error){
-    throw(error);
-  }
-}
+};
 
 export const getFileContent = async (fileName, version) => {
- const token = localStorage.getItem('token');
- const url = version?  `/files/${fileName}/content/${version}?namespace=http://example.cz/File` :`/files/${fileName}/content?namespace=http://example.cz/File`
-  try{
-    const fileContent = await request(url, 'GET', null,  {
+  const token = localStorage.getItem("token");
+  const url = version
+    ? `/files/${fileName}/content/${version}?namespace=http://example.cz/File`
+    : `/files/${fileName}/content?namespace=http://example.cz/File`;
+  try {
+    const fileContent = await request(url, "GET", null, {
       Authorization: `Bearer ${token}`,
-    })
-    
+    });
+
     return fileContent;
-  }
-  catch(error){
+  } catch (error) {
     return error;
   }
-
-}
+};
 
 // POST
 export const addFile = async (entityType, folder, newFile, fileName) => {
@@ -96,7 +95,7 @@ export const addFile = async (entityType, folder, newFile, fileName) => {
   const url = `${entityType.toLowerCase()}s/${folder}/files?namespace=http://example.cz/${entityType}`;
 
   const formData = new FormData();
-  
+
   formData.append("file", newFile);
   formData.append("uri", `http://example.cz/File/${fileName}.html`);
   formData.append("name", fileName);
@@ -108,16 +107,15 @@ export const addFile = async (entityType, folder, newFile, fileName) => {
   //   console.log(`${key}: ${value}`);
   // }
 
-  
   try {
     const file = await request(
       url,
       "POST",
-     formData,
+      formData,
       {
         Authorization: `Bearer ${token}`,
       },
-     true
+      true
     );
     return file;
   } catch (error) {
@@ -154,7 +152,7 @@ export const addFolder = async (
       },
       {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       }
     );
     console.log(request);
@@ -167,75 +165,80 @@ export const addFolder = async (
   }
 };
 
-export const addUserPermission =  (documentId, permissionLevel, userURI) => {
-  const token = localStorage.getItem('token');
+export const addUserPermission = (documentId, permissionLevel, userURI) => {
+  const token = localStorage.getItem("token");
 
-  const url = `documents/${documentId}/permissions/user?namespace=http://example.cz/Document`
+  const url = `documents/${documentId}/permissions/user?namespace=http://example.cz/Document`;
 
-  try{
-     request(url, 'POST', 
-    {
-      "permissionLevel": `${permissionLevel}`,
-      "userURI": `http://example.org/users/${userURI}`
-  }, 
-  {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json'
+  try {
+    request(
+      url,
+      "POST",
+      {
+        permissionLevel: `${permissionLevel}`,
+        userURI: `http://example.org/users/${userURI}`,
+      },
+      {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    );
+  } catch (error) {
+    throw error;
   }
-  )
-  }
-   catch(error){
-    throw(error);
-  }
-  
-}
+};
 
 // PUT
 
 export const update = async (url, id, newEntity) => {
   console.log(id);
   console.log(newEntity);
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
-  try{
-    await request(url, 'PUT', {
-      "@id": `http://example.cz/${newEntity.type}/${id}`,
-      "@type": [
+  try {
+    await request(
+      url,
+      "PUT",
+      {
+        "@id": `http://example.cz/${newEntity.type}/${id}`,
+        "@type": [
           `http://example.cz/${newEntity.type}`,
-          "http://example.cz/Node"
-      ],
-      "http://example.cz/name": `${newEntity.name}`,
-      "http://example.cz/description": `${newEntity.description}`
-  },
-   {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/ld+json'
-    })
-  } catch(error){
+          "http://example.cz/Node",
+        ],
+        "http://example.cz/name": `${newEntity.name}`,
+        "http://example.cz/description": `${newEntity.description}`,
+      },
+      {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/ld+json",
+      }
+    );
+  } catch (error) {
     throw error;
   }
-}
+};
 
-
-export const updateFile =  (newfile, fileName, updateType) => {
-  const token = localStorage.getItem('token');
+export const updateFile = (newfile, fileName, updateType) => {
+  const token = localStorage.getItem("token");
   const url = `files/${fileName}/${updateType}?namespace=http://example.cz/File`;
 
   const formData = new FormData();
   formData.append("file", newfile);
 
   try {
-    return  request(url, "PUT", formData, {
-      Authorization: `Bearer ${token}`,
-    }, true);
+    return request(
+      url,
+      "PUT",
+      formData,
+      {
+        Authorization: `Bearer ${token}`,
+      },
+      true
+    );
   } catch (error) {
     throw error;
   }
-
-}
-
-
-
+};
 
 // DELETE
 export const deleteFolder = async (folderId, isRoot) => {
@@ -255,13 +258,13 @@ export const deleteFolder = async (folderId, isRoot) => {
 
 export const deleteFile = async (fileName) => {
   const token = localStorage.getItem("token");
-  const url = `files/${fileName}?namespace=http://example.cz/File`
+  const url = `files/${fileName}?namespace=http://example.cz/File`;
 
   try {
     return await request(url, "DELETE", null, {
       Authorization: `Bearer ${token}`,
     });
   } catch (error) {
-   throw error;
+    throw error;
   }
-}
+};

@@ -1,35 +1,4 @@
-import styled from "styled-components";
-
-export const Container = styled.div`
-  font-family: "Open Sans", sans-serif;
-  color: black;
-  height: 100%;
-  background: #f4f4f2;
-`;
-
-export const StyledDocumentTreeWrapper = styled.div`
-  position: relative;
-  background: white;
-  border-radius: 6px;
-  width: 80%;
-  padding: 30px;
-  margin-left: 10%;
-  box-shadow: rgb(189 189 189) 5px 5px 10px -1px;
-  overflow: auto;
-  height: 450px;
-  overflow-x: hidden;
-`;
-
-export const StyledIcon = styled.img`
-  height: 30px;
-  width: 30px;
-  position: absolute;
-  right: ${props => props.right};
-  top: ${props => props.top};
-  position:${props => props.position};
-  transform:${props => props.transform};
-  cursor: pointer;
-`;
+import styled from 'styled-components';
 
 export const StyledFileInfo = styled.div`
   position: absolute;
@@ -63,14 +32,24 @@ export const StyledVersionsHeaderWrapper = styled.div`
   width: 80%;
   display: flex;
   justify-content: center;
- `;
+`;
 
 export const StyledVersionsHeader = styled.div`
   width: 40%;
-  margin:0;
+  margin: 0;
   color: #2196f3;
   cursor: pointer;
   margin-bottom: 10px;
   text-align: center;
 `;
 
+export const StyledIcon = styled.img`
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  right: ${(props) => props.right};
+  top: ${(props) => props.top};
+  position: ${(props) => props.position};
+  transform: ${(props) => props.transform};
+  cursor: pointer;
+`;

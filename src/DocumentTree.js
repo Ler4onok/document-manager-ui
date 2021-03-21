@@ -10,7 +10,7 @@ import {
   update,
   updateFile,
 } from "./features/document/index";
-import { FolderList } from "./components/DocumentTree";
+import { FolderList } from "./components/FolderList";
 import { FullModal } from "./components/FullModal";
 import { Header } from "./components/Header";
 import {
@@ -73,10 +73,7 @@ function DocumentTree() {
 
   const handleInput = (event, key) => {
     setNewFolder({ ...newFolder, [key]: event.target.value });
-    console.log(newFolder);
   };
-
-  console.log(newFolder);
 
   useEffect(() => {
     getDocumentsContent();
@@ -85,10 +82,8 @@ function DocumentTree() {
   const getDocumentsContent = async () => {
     try {
       const documentTree = await getDocumentList();
-      console.log(selectedFolder);
       setDocumentTree(documentTree);
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -99,7 +94,6 @@ function DocumentTree() {
   }
 
   const handleAddFolder = async (newFolder) => {
-    console.log(newFolder);
     if (newFolder.type === "Document") {
       try {
         const newF = await addFolder(
@@ -108,15 +102,12 @@ function DocumentTree() {
           newFolder.description,
           selectedFolder.isRoot
         );
-        console.log(newF);
         setOpenFolderModal(false);
         handleAddUserPermission()
       } catch (e) {
-        console.log("Cannot add a document. Reason: " + e);
       }
     } else {
       const parentFolderName = getLinkInfo(selectedFolder.id, 2);
-      console.log(parentFolderName);
       try {
         const newF = await addFolder(
           newFolder.type,
@@ -125,12 +116,10 @@ function DocumentTree() {
           selectedFolder.isRoot,
           parentFolderName
         );
-        console.log(newF);
         setError(null);
         setOpenFolderModal(false);
       } catch (e) {
         setError("Such folder exists. Change the name, please");
-        console.log("Cannot add a folder. Reason: " + e);
       }
     }
   };
@@ -147,12 +136,12 @@ function DocumentTree() {
   };
 
   const handleUpdate = async () => {
-    console.log(selectedFolder);
     const id = getLinkInfo(selectedFolder["id"], 2);
     const reqType = getEndpointInfo(newFolder.type);
     const url = `${reqType}/${id}?namespace=http://example.cz/${newFolder.type}`;
 
     await update(url, id, newFolder);
+    handleAddUserPermission(id)
     setNewFolder({ ...newFolder, name: "", description: "" });
   };
 
@@ -163,12 +152,9 @@ function DocumentTree() {
   };
 
   const handleAddFile = async () => {
-    console.log(selectedFolder.id);
     if (selectedFolder.id) {
       const parentFolderName = getLinkInfo(selectedFolder.id, 2);
       const entityType = getLinkInfo(selectedFolder.id, 1);
-      console.log(parentFolderName);
-      console.log(entityType);
 
       try {
         const _file = await addFile(
@@ -177,10 +163,8 @@ function DocumentTree() {
           file,
           uploadedFileName
         );
-        console.log(_file);
         setOpenFileModal(false);
       } catch (e) {
-        console.log("Cannot add a folder. Reason: " + e);
       }
     }
   };
@@ -190,7 +174,6 @@ function DocumentTree() {
     // formData.append(event.target.files[0])
 
     const file = event.target.files[0];
-    console.log(file);
 
     setFile(file);
     setUploadedFileName(file.name);
@@ -201,12 +184,9 @@ function DocumentTree() {
   //   return <div>Loading...</div>;
   // }
 
-  console.log(documentTree);
 
-  const handleAddUserPermission = () => {
-    console.log(newFolder);
-    console.log(selectedFolder);
-    addUserPermission(newFolder.name, newFolder.permissionLevel, newFolder.userURI);
+  const handleAddUserPermission = (id = newFolder.name.trim().replace(/\s/g, "")) => {
+    addUserPermission(id, newFolder.permissionLevel, newFolder.userURI);
   };
 
   return (
@@ -309,7 +289,6 @@ function DocumentTree() {
                         id="demo-simple-select"
                         value={userPermission}
                         onChange={(event) => {
-                          console.log(event.target.value);
                           handleInput(event, "permissionLevel");
                           setUserPermission(event.target.value);
                         }}
@@ -324,7 +303,7 @@ function DocumentTree() {
                       variant="contained"
                       color="primary"
                       style={{ background: "#2196f3", height: "35px" }}
-                      onClick={() => handleAddUserPermission()}
+                      onClick={() => handleAddUserPermission('Add')}
                     >
                       Add
                     </Button>
@@ -398,7 +377,6 @@ function DocumentTree() {
                     const reversedFileVersions = _fileVersions
                       .map((version) => version)
                       .reverse();
-                    console.log(reversedFileVersions);
                     setFileVersions(reversedFileVersions);
                     setVersionsOpen(!areVersionsOpen);
                   }}
@@ -467,7 +445,6 @@ function DocumentTree() {
             //   setOpenModal={setOpenFileInfoModal}
             //   header="File information"
             // >
-            //   {console.log(fileInfo)}
             //   <div>File name: {fileInfo["http://example.cz/fileName"]}</div>
             //   <div>File type: {fileInfo["http://example.cz/fileType"]}</div>
             //   <div>File version: {fileInfo["http://example.cz/version"]}</div>

@@ -15,7 +15,7 @@ export const StyledDocumentTreeWrapper = styled.div`
   padding: 30px;
   margin-left: 10%;
   box-shadow: rgb(189 189 189) 5px 5px 10px -1px;
-  overflow: scroll;
+  overflow: auto;
   height: 450px;
   overflow-x: hidden;
 `;
@@ -34,7 +34,7 @@ export const StyledIcon = styled.img`
 export const StyledFileInfo = styled.div`
   position: absolute;
   height: 400px;
-  overflow: scroll;
+  overflow: auto;
   overflow-x: hidden;
   z-index: 10;
   right: 15%;

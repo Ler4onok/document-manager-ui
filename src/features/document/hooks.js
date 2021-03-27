@@ -1,62 +1,142 @@
-import { useEffect, useState } from "react";
-import { addFolder, getDocumentList } from "./api";
-import { getLinkInfo } from "./utils";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { addFolder, getDocumentList, updateFolder } from "./api";
+import { getLinkInfo, getEndpointInfo } from "./utils";
 
+const EntityName = "RootDocuments";
+
+/**
+ *
+ */
 export const useDocuments = () => {
-  const [documents, setDocuments] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { data, isLoading, error } = useQuery(EntityName, getDocumentList);
+  return { documents: data, error, loading: isLoading };
+};
 
-  const getDocumentsContent = async () => {
+/**
+ *
+ * @param {*} param0
+ */
+export const useEditFolder = ({ modals, onClose }) => {
+  const queryClient = useQueryClient();
+
+  const handleUpdateFolder = async (values) => {
+    const { isEdit, parentFolderId, isOpen } = modals.folder;
+    if (!isEdit || !isOpen) return;
+
+    const id = getLinkInfo(parentFolderId, 2);
+    const type = getLinkInfo(parentFolderId, 1);
+    const reqType = getEndpointInfo(type);
+    const url = `${reqType}/${id}?namespace=http://example.cz/${type}`;
+
+    await updateFolder({ url, id, values, type });
+    // handleAddUserPermission(id);
+    onClose();
+  };
+
+  const handleAddFolderFetcher = async (data) => {
+    const { isRoot, parentFolderId, isOpen, isEdit } = modals.folder;
+    if (!isOpen || isEdit) return;
+
+    const parentFolderName = getLinkInfo(parentFolderId, 2);
+
     try {
-      setLoading(true);
-      const documentTree = await getDocumentList();
-      setLoading(false);
-      setDocuments(documentTree);
-    } catch (error) {
-      setLoading(false);
-      setError("Some error");
+      await addFolder(
+        parentFolderId ? "Folder" : "Document",
+        data.name,
+        data.description,
+        isRoot,
+        parentFolderName
+      );
+      onClose();
+      // handleAddUserPermission();
+    } catch (e) {
+      console.log(e);
     }
   };
 
-  useEffect(() => {
-    getDocumentsContent();
-  }, []);
+  const onSuccess = async (response, rootDocument) => {
+    const prevRootDocuments = queryClient.getQueryData(EntityName);
+    if (prevRootDocuments) {
+      queryClient.setQueryData(EntityName, [
+        ...prevRootDocuments,
+        { ...rootDocument, id: response.id },
+      ]);
+    }
+  };
 
-  return { documents, error, loading };
+  const handleFolder = (values) => {
+    if (modals.folder.isEdit) {
+      handleUpdateFolder(values);
+    } else {
+      handleAddFolderFetcher(values);
+    }
+  };
+
+  const { mutateAsync } = useMutation();
+
+  return { handleFolder };
 };
 
-// const useAddFolder = ({ onClose }) => {
-//   const handleAddFolder = async (folderData) => {
-//     if (folderData.type === "Document") {
-//       try {
-//         const newF = await addFolder(
-//           folderData.type,
-//           folderData.name,
-//           folderData.description,
-//           // selectedFolder.isRoot
-//         );
-//         onClose();
-//         handleAddUserPermission()
-//       } catch (e) {
-//       }
-//     } else {
-//       const parentFolderName = getLinkInfo(selectedFolder.id, 2);
-//       try {
-//         const newF = await addFolder(
-//           folderData.type,
-//           folderData.name,
-//           folderData.description,
-//           selectedFolder.isRoot,
-//           parentFolderName
-//         );
-//         // setError(null);
-//         onClose();
-//       } catch (e) {
-//         // setError("Such folder exists. Change the name, please");
-//       }
-//     }
-//   };
+/**
+ * 
+ * @param {*} param0 
+ */
+export const useAddRootFolder = ({ onClose, modals }) => {
+  
+  const handleAddFolderFetcher = async (data) => {
+    console.log(data)
+    const { isRoot, parentFolderId, isOpen, isEdit } = modals.folder;
+    if (!isOpen || isEdit) return;
 
-//   return { handleAddFolder }
-// }
+    const parentFolderName = getLinkInfo(parentFolderId, 2);
+
+    try {
+      const addedFolderResponse = await addFolder(
+        parentFolderId ? "Folder" : "Document",
+        data.name,
+        data.description,
+        isRoot,
+        parentFolderName
+      );
+
+      return addedFolderResponse;
+      // handleAddUserPermission();
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const onSuccess = (response, rootDocument) => {
+    const { parentFolderId } = modals.folder;
+
+    if (!parentFolderId) {
+      const prevRootDocuments = queryClient.getQueryData(EntityName);
+      
+      if (prevRootDocuments) {
+        queryClient.setQueryData(EntityName, [
+          ...prevRootDocuments,
+          response,
+        ]);
+      }
+    } else {
+      const ChildEntityName = `FolderChilds:${getLinkInfo(parentFolderId, 2)}`;
+      const prevChildrens = queryClient.getQueryData(ChildEntityName);
+      console.log(prevChildrens);
+      if (prevChildrens) {
+        queryClient.setQueryData(ChildEntityName, [
+          ...prevChildrens,
+          response,
+        ]);
+      }
+    }
+
+    onClose();
+  };
+
+  const queryClient = useQueryClient();
+  const { mutateAsync, isLoading, error } = useMutation(handleAddFolderFetcher, {
+    onSuccess,
+  });
+
+  return { addRootFolder: mutateAsync, isLoading, error };
+};

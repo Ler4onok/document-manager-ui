@@ -10,16 +10,18 @@ const FolderManageModal = ({ initialData = {}, handleSubmit, onClose }) => {
     description: initialData.description || '',
     userURI: initialData.userURI || '',
     permissionLevel: initialData.permissionLevel || '',
-    type: initialData.type || '',
+    // type: initialData.type || '',
   })
 
   const handleInput = (event, key) => {
     setFolderFields({ ...folderFields, [key]: event.target.value });
   };
 
+  const onSubmit = () => handleSubmit(folderFields);
+
   return (
     <Modal
-      handleSubmit={handleSubmit}
+      handleSubmit={onSubmit}
       onClose={onClose}
       // header={`${newFolder.event} a ${newFolder.type.toLowerCase()}`}
     >

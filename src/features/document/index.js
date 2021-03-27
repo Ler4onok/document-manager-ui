@@ -15,8 +15,6 @@ export const getDocumentList = async () => {
 
 export const getSubfolders = async (url) => {
   const token = localStorage.getItem("token");
-  console.log("get subfolders");
-  console.log(url);
   try {
     const subfoldersList = await request(url, "GET", null, {
       Authorization: `Bearer ${token}`,
@@ -134,6 +132,8 @@ export const addFolder = async (
 ) => {
   const token = localStorage.getItem("token");
 
+  console.log({ isRootApi: isRoot });
+
   const uriName = name.trim().replace(/\s/g, "");
   const typpe =
     type === "Document"
@@ -192,20 +192,19 @@ export const addUserPermission =  (documentId, permissionLevel, userURI) => {
 
 // PUT
 
-export const update = async (url, id, newEntity) => {
+export const updateFolder = async ({ url, id, values, type }) => {
   console.log(id);
-  console.log(newEntity);
   const token = localStorage.getItem('token');
 
   try{
     await request(url, 'PUT', {
-      "@id": `http://example.cz/${newEntity.type}/${id}`,
+      "@id": `http://example.cz/${type}/${id}`,
       "@type": [
-          `http://example.cz/${newEntity.type}`,
+          `http://example.cz/${type}`,
           "http://example.cz/Node"
       ],
-      "http://example.cz/name": `${newEntity.name}`,
-      "http://example.cz/description": `${newEntity.description}`
+      "http://example.cz/name": `${values.name}`,
+      "http://example.cz/description": `${values.description}`
   },
    {
       Authorization: `Bearer ${token}`,

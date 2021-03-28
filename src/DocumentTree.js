@@ -5,7 +5,7 @@ import { Container, StyledDocumentTreeWrapper } from "./styled";
 import { AddDocumentIcon } from "./components/AddDocumentIcon";
 import { FileInfo } from "./components/FileInfo";
 import { FolderManageModal } from "./components/FolderManageModal";
-import { useDocuments, useAddRootFolder } from "./features/document/hooks";
+import { useDocuments, useAddRootFolder, useEditFolder } from "./features/document/hooks";
 import { FileManageModal } from "./components/FileManageModal";
 
 const initModalState = {
@@ -23,6 +23,7 @@ function DocumentTree() {
   
   const { documents, loading, error } = useDocuments();
   const { addRootFolder } = useAddRootFolder({ modals, onClose });
+  const  { editFolder } = useEditFolder({ modals, onClose});
 
   const handleAddFile = async () => {
     // if (selectedFolder.id) {
@@ -56,7 +57,7 @@ function DocumentTree() {
   }
 
   const isAuthorized = !!localStorage.getItem("token");
-
+  console.log(modals)
   return (
     <Container>
       <Header isAuthorized={isAuthorized} />
@@ -90,10 +91,11 @@ function DocumentTree() {
           {(modals.folder.isOpen) && (
             <FolderManageModal
               onClose={onClose}
-              handleSubmit={addRootFolder}
+              handleSubmit={modals.folder.isEdit ? editFolder : addRootFolder}
               initialData={modals.folder.initialData}
             />
           )}
+
           {isOpenFileModal && (
             <FileManageModal onClose={() => setOpenFileModal(false)} />
           )}

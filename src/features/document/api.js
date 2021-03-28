@@ -195,7 +195,7 @@ export const updateFolder = async ({ url, id, values, type }) => {
   const token = localStorage.getItem('token');
 
   try{
-    await request(url, 'PUT', {
+    const updatedFolder = await request(url, 'PUT', {
       "@id": `http://example.cz/${type}/${id}`,
       "@type": [
           `http://example.cz/${type}`,
@@ -208,6 +208,8 @@ export const updateFolder = async ({ url, id, values, type }) => {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/ld+json'
     })
+
+    return updatedFolder;
   } catch(error){
     throw error;
   }

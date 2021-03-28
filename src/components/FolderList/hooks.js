@@ -1,10 +1,19 @@
 import { useQuery } from "react-query";
-import { getFiles, getSubfolders } from "../../features/document";
+import { getFiles, getSubfolders, getFolderByURI } from "../../features/document";
 import { getLinkInfo } from "../../features/document/utils";
 
 const EntityName = 'FolderChilds';
 
 export const useFolderChildren = ({ folder, isRoot }) => {
+
+  const getFolderData = async () => {
+    const folderId = getLinkInfo(folder["@id"], 2);
+    const _folderData = await getFolderByURI(folderId);
+    console.log(_folderData);
+    return _folderData;
+  }
+
+
   const getSubfolderList = async () => {
     const folderId = getLinkInfo(folder["@id"], 2);
 
@@ -19,6 +28,7 @@ export const useFolderChildren = ({ folder, isRoot }) => {
       console.error(error);
     }
   };
+
 
   const getFilesList = async (isRoot) => {
     const folderId = folder["@id"].replace(
@@ -48,7 +58,11 @@ export const useFolderChildren = ({ folder, isRoot }) => {
     }
   };
 
-  const { data: folderChilds = [] } = useQuery(`${EntityName}:${getLinkInfo(folder["@id"], 2)}`, getFolderItems);
 
-  return { folderChilds };
+  const { data: folderChilds = [] } = useQuery(`${EntityName}:${getLinkInfo(folder["@id"], 2)}`, getFolderItems);
+  // const { data: folderData = [] } = useQuery(`FolderData:${getLinkInfo(folder["@id"], 2)}`, getFolderData);
+
+  return { folderChilds,
+    //  folderData 
+    };
 };

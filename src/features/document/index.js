@@ -13,6 +13,15 @@ export const getDocumentList = async () => {
   }
 };
 
+export const getFolderByURI = async (folderURI) => {
+  const token = localStorage.getItem('token')
+  const url = `/folders/${folderURI}?namespace=http://example.cz/Folder`
+  const folder = await request(url, "GET", null, {
+    Authorization: `Bearer ${token}`,
+  });
+  return folder
+}
+
 export const getSubfolders = async (url) => {
   const token = localStorage.getItem("token");
   try {

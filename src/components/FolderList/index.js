@@ -32,6 +32,7 @@ const FolderList = ({
   setModifierModal,
   isRoot = false,
 }) => {
+  console.log(list)
   return (
     <div style={{ width: "fit-content" }}>
       {list.map((folder) => (

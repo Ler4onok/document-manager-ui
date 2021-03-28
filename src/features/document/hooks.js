@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { addFolder, getDocumentList, updateFolder } from "./api";
+import { addFolder, addUserPermission, getDocumentList, updateFolder } from "./api";
 import { getLinkInfo, getEndpointInfo } from "./utils";
 
 const EntityName = "RootDocuments";
@@ -28,9 +28,11 @@ export const useEditFolder = ({ modals, onClose }) => {
     const reqType = getEndpointInfo(type);
     const url = `${reqType}/${id}?namespace=http://example.cz/${type}`;
 
-    await updateFolder({ url, id, values, type });
+    const editedFolderResponse = await updateFolder({ url, id, values, type });
     // handleAddUserPermission(id);
-    onClose();
+    // onClose();
+    console.log(editedFolderResponse)
+    return editedFolderResponse;
   };
 
   const handleAddFolderFetcher = async (data) => {
@@ -52,16 +54,24 @@ export const useEditFolder = ({ modals, onClose }) => {
     } catch (e) {
       console.log(e);
     }
+   
+    
   };
 
   const onSuccess = async (response, rootDocument) => {
-    const prevRootDocuments = queryClient.getQueryData(EntityName);
-    if (prevRootDocuments) {
-      queryClient.setQueryData(EntityName, [
-        ...prevRootDocuments,
-        { ...rootDocument, id: response.id },
-      ]);
-    }
+    // console.log(response)
+    // const { parentFolderId } = modals.folder;
+    // const ChildEntityName = `FolderData:${getLinkInfo(parentFolderId, 2)}`;
+    // const folderData = queryClient.getQueryData(ChildEntityName);
+    // console.log(folderData);
+   
+    // if (folderData) {
+    //   queryClient.setQueryData(ChildEntityName, 
+    // );
+    // }
+
+    onClose();
+
   };
 
   const handleFolder = (values) => {
@@ -72,9 +82,9 @@ export const useEditFolder = ({ modals, onClose }) => {
     }
   };
 
-  const { mutateAsync } = useMutation();
+  const { mutateAsync } = useMutation(handleUpdateFolder, {onSuccess});
 
-  return { handleFolder };
+  return { editFolder: mutateAsync };
 };
 
 /**
@@ -99,12 +109,27 @@ export const useAddRootFolder = ({ onClose, modals }) => {
         parentFolderName
       );
 
+      console.log(data.userURI);
+      console.log(data.permissionLevel);
+
+      if (data.userURI !== '' && data.permissionLevel !== ''){
+        try{
+          await addUserPermission(data.name.trim().replace(/\s/g, ""), data.permissionLevel, data.userURI)
+        }
+        catch (e) {
+          console.log(e);
+        }
+      }
+
       return addedFolderResponse;
       // handleAddUserPermission();
     } catch (e) {
       console.log(e);
     }
+
   };
+
+ 
 
   const onSuccess = (response, rootDocument) => {
     const { parentFolderId } = modals.folder;
@@ -121,7 +146,8 @@ export const useAddRootFolder = ({ onClose, modals }) => {
     } else {
       const ChildEntityName = `FolderChilds:${getLinkInfo(parentFolderId, 2)}`;
       const prevChildrens = queryClient.getQueryData(ChildEntityName);
-      console.log(prevChildrens);
+      // console.log(ChildEntityName)
+      // console.log(prevChildrens);
       if (prevChildrens) {
         queryClient.setQueryData(ChildEntityName, [
           ...prevChildrens,

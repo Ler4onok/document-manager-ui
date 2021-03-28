@@ -139,6 +139,7 @@ const FolderItem = memo(({
                   setModals({
                     folder: {
                       isOpen: true,
+                      //parent folder id 
                       parentFolderId: folder["@id"] || null,
                       isEdit: true,
                       isRoot,

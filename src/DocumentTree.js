@@ -215,11 +215,24 @@ function DocumentTree() {
 
       {localStorage.getItem("token") && (
         <div>
+          <div>
           <h1
-            style={{ marginLeft: "10%", display: "flex", alignItems: "center" }}
+            style={{ marginLeft: "10%", display: "flex", alignItems: "center", position: 'relative' }}
           >
-            Directories
+            Documents
           </h1>
+          <StyledIcon
+              left="23%"
+              top='19%'
+              src={plusIcon}
+              title="Add a new document"
+              // style={{ position: "absolute", right: 20 }}
+              onClick={() => {
+                setOpenFolderModal(true);
+                setNewFolder({ ...newFolder, type: "Document", event: "Add" });
+              }}
+            />
+          </div>
           {isOpenFolderModal && (
             <Modal
               handleSubmit={
@@ -452,16 +465,7 @@ function DocumentTree() {
           )}
 
           <StyledDocumentTreeWrapper>
-            <StyledIcon
-              right="30px"
-              src={plusIcon}
-              title="Add a new document"
-              // style={{ position: "absolute", right: 20 }}
-              onClick={() => {
-                setOpenFolderModal(true);
-                setNewFolder({ ...newFolder, type: "Document", event: "Add" });
-              }}
-            />
+           
             <FolderList
               list={documentTree}
               setOpenFolderModal={setOpenFolderModal}

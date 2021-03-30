@@ -10,7 +10,7 @@ export const StyledIconWrapper = styled.div`
 `;
 
 export const StyledFolderItem = styled(animated.div)`
-  font-size: 20px;
+  font-size: 22px;
   color: gray;
   cursor: pointer;
   margin: 15px;

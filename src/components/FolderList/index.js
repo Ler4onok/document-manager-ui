@@ -116,6 +116,7 @@ const FolderItem = memo(({
                   setModals({
                     folder: {
                       isOpen: true,
+                      folderId: null,
                       parentFolderId: folder["@id"] || null,
                       isEdit: false,
                       isRoot,
@@ -139,8 +140,8 @@ const FolderItem = memo(({
                   setModals({
                     folder: {
                       isOpen: true,
-                      //parent folder id 
-                      parentFolderId: folder["@id"] || null,
+                      folderId: folder['@id'],
+                      parentFolderId: isRoot? null : folder['http://example.cz/parentFolder']["@id"],
                       isEdit: true,
                       isRoot,
                       initialData: {

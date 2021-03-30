@@ -20,11 +20,11 @@ export const useEditFolder = ({ modals, onClose }) => {
   const queryClient = useQueryClient();
 
   const handleUpdateFolder = async (values) => {
-    const { isEdit, parentFolderId, isOpen } = modals.folder;
+    const { isEdit, folderId, isOpen } = modals.folder;
     if (!isEdit || !isOpen) return;
 
-    const id = getLinkInfo(parentFolderId, 2);
-    const type = getLinkInfo(parentFolderId, 1);
+    const id = getLinkInfo(folderId, 2);
+    const type = getLinkInfo(folderId, 1);
     const reqType = getEndpointInfo(type);
     const url = `${reqType}/${id}?namespace=http://example.cz/${type}`;
 
@@ -58,32 +58,22 @@ export const useEditFolder = ({ modals, onClose }) => {
     
   };
 
-  const findFolderToEdit = (list, id) => {
-    return list.find((child) => child['@id'] === id)
-  }
+  const onSuccess =  (response) => {
+    console.log(response)
+    const { isRoot, parentFolderId } = modals.folder;
+    if (isRoot){
+      //if document change the name
+      const documents = queryClient.getQueryData(EntityName);
+      queryClient.setQueryData(EntityName, documents.map(folder => folder['@id'] === response['@id'] ? response : folder))
+    }
+    else{
+      //if folder change the element in the list of folders 
+      const _parentFolderName = getLinkInfo(parentFolderId, 2);
+      const parentFolderName = _parentFolderName.includes('_root') ? `FolderChilds:${_parentFolderName.replace('_root', '')}` : `FolderChilds:${_parentFolderName}`;
+      const folders = queryClient.getQueryData(parentFolderName);
+      queryClient.setQueryData(parentFolderName, folders.map(folder => folder['@id'] === response['@id'] ? response : folder))
 
-  const onSuccess =  (response, rootDocument) => {
-    // console.log(response)
-    // const { parentFolderId } = modals.folder;
-    // const ChildEntityName = `FolderData:${getLinkInfo(parentFolderId, 2)}`;
-    // const folderData = queryClient.getQueryData(ChildEntityName);
-    // const parentFolderName = getLinkInfo(folderData['http://example.cz/parentFolder']["@id"], 2)
-    // const _parentFolderName = parentFolderName.includes('_root') ? `FolderChilds:${parentFolderName.replace('_root', '')}` : `FolderChilds:${parentFolderName}`;
-    // const parentFolderChildren = queryClient.getQueryData(_parentFolderName);
-    // // console.log(_parentFolderName)
-    // // console.log(parentFolderChildren);
-
-    // const folderToEdit =  findFolderToEdit(parentFolderChildren, folderData['@id'])
-    // // console.log(folderToEdit)
-
-
-    // console.log(ChildEntityName)
-    // console.log(response)
-    // queryClient.setQueryData(ChildEntityName, response);
-
-    console.log(modals.folder)
-    const folders = queryClient.getQueryData('FolderChilds:Testdocument');
-    queryClient.setQueryData('FolderChilds:Testdocument', folders.map(folder => folder['@id'] === 'http://example.cz/Folder/ss' ? response : folder))
+    }
 
     onClose();
 

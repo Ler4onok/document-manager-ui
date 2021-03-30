@@ -9,7 +9,7 @@ import { useDocuments, useAddRootFolder, useEditFolder } from "./features/docume
 import { FileManageModal } from "./components/FileManageModal";
 
 const initModalState = {
-  folder: { isOpen: false, parentFolderId: null, isRoot: false, isEdit: false, initialData: {} },
+  folder: { isOpen: false, folderId: null,  parentFolderId: null, isRoot: false, isEdit: false, initialData: {} },
 };
 
 function DocumentTree() {
@@ -107,6 +107,7 @@ function DocumentTree() {
                   ...initModalState,
                   folder: {
                     isOpen: true,
+                    folderId: null,
                     parentFolderId: null,
                     isRoot: true,
                     isEdit: false,

@@ -1,21 +1,34 @@
 import React, { useState } from 'react';
 import { Modal } from "../Modal";
 
-const FileManageModal = ({ handleAddFile, onClose }) => {
-  const [file, setFile] = useState(null);
-  const [filename, setFilename] = useState('');
+const FileManageModal = ({initialData={}, handleSubmit, onClose}) => {
+  // const [file, setFile] = useState(null);
+  // const [filename, setFilename] = useState('');
+
+  const [fileFields, setFileFields] = useState({
+    file: initialData.file || '',
+    filename: initialData.filename || ''
+  })
+
+  // const handleInput = (event, key) => {
+  //   setFileFields({ ...fileFields, [key]: event.target.value });
+  // };
+
+  const onSubmit = () => handleSubmit(fileFields);
+
 
   const handleFileUpload = (event) => {
     const _file = event.target.files[0];
-    setFilename(_file.name.split('.')[0]);
-    setFile(_file);
+    setFileFields({...fileFields, filename: _file.name.split('.')[0]});
+    setFileFields({...fileFields, file: _file});
   };
 
-  const hasFile = file !== null;
+  const hasFile = fileFields.file !== null;
+
 
   return (
     <Modal
-      handleSubmit={handleAddFile}
+      handleSubmit={onSubmit}
       onClose={onClose}
       header="Add a new file"
       // newObject={newFile}
@@ -23,7 +36,7 @@ const FileManageModal = ({ handleAddFile, onClose }) => {
       <input
         type="file"
         id="grade_csv"
-        name="lalal"
+        // name="lalal"
         onChange={handleFileUpload}
         style={{ marginTop: "10px" }}
       />
@@ -34,11 +47,11 @@ const FileManageModal = ({ handleAddFile, onClose }) => {
             Filename:{" "}
             <input
               type="text"
-              value={filename}
-              onChange={(event) => setFilename(event.target.value)}
+              value={fileFields.filename}
+              onChange={(event) =>  setFileFields({ ...fileFields, filename: event.target.value })}
             />
           </div>
-          <div>Filetype: {file.type}</div>
+          <div>Filetype: {fileFields.file.type}</div>
         </div>
       ) : (
         <p>Select a file to show details</p>

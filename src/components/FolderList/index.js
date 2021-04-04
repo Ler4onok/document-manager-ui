@@ -26,7 +26,7 @@ import { getLinkInfo } from "../../features/document/utils";
 const FolderList = ({
   list,
   setModals,
-  setOpenFileModal,
+  // setOpenFileModal,
   setOpenFileInfoModal,
   setFileInfo,
   setModifierModal,
@@ -41,7 +41,7 @@ const FolderList = ({
           folder={folder}
           isRoot={isRoot}
           setModals={setModals}
-          setOpenFileModal={setOpenFileModal}
+          // setOpenFileModal={setOpenFileModal}
           setOpenFileInfoModal={setOpenFileInfoModal}
           setFileInfo={setFileInfo}
         />
@@ -54,7 +54,7 @@ const FolderItem = memo(({
   folder,
   isRoot,
   setModals,
-  setOpenFileModal,
+  // setOpenFileModal,
   setOpenFileInfoModal,
   setFileInfo,
 }) => {
@@ -129,8 +129,21 @@ const FolderItem = memo(({
                 src={addFileIcon}
                 title="Add a new file"
                 onClick={() => {
-                  // setOpenFileModal(true);
-                }}
+                  setModals({
+                    folder: {
+                      isOpen: false,
+                      folderId: folder['@id'],
+                      parentFolderId: isRoot? null : folder['http://example.cz/parentFolder']["@id"],
+                      isRoot,
+                      fileAdd: true
+                    },
+                    file: {
+                      isOpen: true,
+                      isAdd: true,
+                    }
+                  });
+                }
+              }
               />
 
               <StyledIcon
@@ -155,8 +168,25 @@ const FolderItem = memo(({
               <StyledIcon
                 src={deleteFolderIcon}
                 title="Delete a folder"
-                onClick={() => handleDeleteFolder()}
-              />
+                onClick={() => {
+                  setModals({
+                    folder: {
+                      isOpen: false,
+                      folderId: folder['@id'],
+                      parentFolderId: isRoot? null : folder['http://example.cz/parentFolder']["@id"],
+                      isEdit: false,
+                      isDelete: true,
+                      isRoot,
+                      initialData: {
+                        name: folder["http://example.cz/name"],
+                        description: folder["http://example.cz/description"],
+                      },
+                    },
+                    file: {
+                      isFile: false
+                    }
+                  });
+                }}              />
             </StyledIconWrapper>
           )}
 
@@ -197,7 +227,25 @@ const FolderItem = memo(({
               <StyledIcon
                 src={deleteFolderIcon}
                 title="Delete a file"
-                onClick={() => handleDeleteFile()}
+                onClick={() => {
+                  setModals({
+                    folder: {
+                      isOpen: false,
+                      folderId: folder['@id'],
+                      // parentFolderId: isRoot? null : folder['http://example.cz/parentFolder']["@id"],
+                      isEdit: false,
+                      isDelete: true,
+                      isRoot,
+                      initialData: {
+                        name: folder["http://example.cz/name"],
+                        description: folder["http://example.cz/description"],
+                      },
+                    },
+                    file: {
+                      isFile: true
+                    }
+                  });
+                }}
               />
             </StyledIconWrapper>
           )}
@@ -205,7 +253,7 @@ const FolderItem = memo(({
         {hasChildren && (
           <FolderList
             list={folderChilds}
-            setOpenFileModal={setOpenFileModal}
+            // setOpenFileModal={setOpenFileModal}
             setOpenFileInfoModal={setOpenFileInfoModal}
             setFileInfo={setFileInfo}
             setModals={setModals}

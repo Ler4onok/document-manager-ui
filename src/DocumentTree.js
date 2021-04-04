@@ -5,16 +5,19 @@ import { Container, StyledDocumentTreeWrapper } from "./styled";
 import { AddDocumentIcon } from "./components/AddDocumentIcon";
 import { FileInfo } from "./components/FileInfo";
 import { FolderManageModal } from "./components/FolderManageModal";
-import { useDocuments, useAddRootFolder, useEditFolder } from "./features/document/hooks";
+import { useDocuments, useAddRootFolder, useEditFolder, useDeleteFolder, useDelete, useAddFile } from "./features/document/hooks";
 import { FileManageModal } from "./components/FileManageModal";
+import { Modal } from "./components/Modal";
 
 const initModalState = {
-  folder: { isOpen: false, folderId: null,  parentFolderId: null, isRoot: false, isEdit: false, initialData: {} },
+  folder: { isOpen: false, folderId: null, parentFolderId: null, isRoot: false, isEdit: false, isDelete: false, initialData: {}, fileAdd: false, file: null, fileName: null},
+  // file: {isOpen: false, isFile: false, isAdd: false, isInfo: false, initialData: {}}
+
 };
 
 function DocumentTree() {
   const [modals, setModals] = useState(initModalState);
-  const [isOpenFileModal, setOpenFileModal] = useState(false);
+  // const [isOpenFileModal, setOpenFileModal] = useState(false);
   const [isOpenFileInfoModal, setOpenFileInfoModal] = useState(false);
 
   const [fileInfo, setFileInfo] = useState();
@@ -24,23 +27,25 @@ function DocumentTree() {
   const { documents, loading, error } = useDocuments();
   const { addRootFolder } = useAddRootFolder({ modals, onClose });
   const  { editFolder } = useEditFolder({ modals, onClose});
+  const { handleDeleteEntity } = useDelete({ modals, onClose})
+  const {handleAddFileFetcher} =  useAddFile({modals, onClose })
 
-  const handleAddFile = async () => {
-    // if (selectedFolder.id) {
-    //   const parentFolderName = getLinkInfo(selectedFolder.id, 2);
-    //   const entityType = getLinkInfo(selectedFolder.id, 1);
+  // const handleAddFile = async () => {
+  //   // if (selectedFolder.id) {
+  //   //   const parentFolderName = getLinkInfo(selectedFolder.id, 2);
+  //   //   const entityType = getLinkInfo(selectedFolder.id, 1);
 
-    //   try {
-    //     const _file = await addFile(
-    //       entityType,
-    //       parentFolderName
-    //       // file,
-    //       // uploadedFileName
-    //     );
-    //     setOpenFileModal(false);
-    //   } catch (e) {}
-    // }
-  };
+  //   //   try {
+  //   //     const _file = await addFile(
+  //   //       entityType,
+  //   //       parentFolderName
+  //   //       // file,
+  //   //       // uploadedFileName
+  //   //     );
+  //   //     setOpenFileModal(false);
+  //   //   } catch (e) {}
+  //   // }
+  // };
 
   // const handleAddUserPermission = (
   //   id = newFolder.name.trim().replace(/\s/g, "")
@@ -88,6 +93,10 @@ function DocumentTree() {
           >
             Directories
           </h1>
+
+
+          {/* FOLDER */}
+
           {(modals.folder.isOpen) && (
             <FolderManageModal
               onClose={onClose}
@@ -96,10 +105,23 @@ function DocumentTree() {
             />
           )}
 
-          {isOpenFileModal && (
-            <FileManageModal onClose={() => setOpenFileModal(false)} />
+          {(modals.folder.isDelete) && (
+            <Modal
+            onClose={onClose}
+            handleSubmit={handleDeleteEntity}
+            isDelete={modals.folder.isDelete}
+            />
           )}
+
+          {/* FILE */}
+
+          {modals.folder.fileAdd && (
+          <FileManageModal onClose={onClose} handleSubmit={handleAddFileFetcher} initialData={modals.folder.initialData}/>
+          )}
+
           {isOpenFileInfoModal && <FileInfo fileInfo={fileInfo} />}
+
+
           <StyledDocumentTreeWrapper>
             <AddDocumentIcon
               onOpenAddModal={() =>
@@ -113,13 +135,21 @@ function DocumentTree() {
                     isEdit: false,
                     initialData: {}
                   },
+                  file: {
+                    isOpen: false,
+                    isFile: false,
+                    isAdd: false,
+                    isInfo: false,
+                    initialData: {}
+
+                  }
                 })
               }
             />
             <FolderList
               list={documents}
               setModals={setModals}
-              setOpenFileModal={setOpenFileModal}
+              // setOpenFileModal={setOpenFileModal}
               setOpenFileInfoModal={setOpenFileInfoModal}
               setFileInfo={setFileInfo}
               isRoot={true}

@@ -7,7 +7,9 @@ export const Modal = ({
   onClose,
   children,
   header,
+  isDelete
 }) => {
+  const color = isDelete? 'secondary' : 'primary'
   return (
     <StyledModalContainer>
       <StyledModal>
@@ -37,9 +39,10 @@ export const Modal = ({
           <Button variant="contained" onClick={onClose}>
             Cancel
           </Button>
+          
           <Button
             variant="contained"
-            color="primary"
+            color={color}
             onClick={handleSubmit}
             style={{
               marginLeft: "10px",
@@ -47,7 +50,7 @@ export const Modal = ({
               background: "#2196f3",
             }}
           >
-            Submit
+            {isDelete? 'Delete': 'Submit'}
           </Button>
         </div>
       </StyledModal>

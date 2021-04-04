@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { addFolder, addUserPermission, getDocumentList, updateFolder } from "./api";
+import { deleteFolder } from ".";
+import { addFile, addFolder, addUserPermission, deleteFile, getDocumentList, updateFolder } from "./api";
 import { getLinkInfo, getEndpointInfo } from "./utils";
 
 const EntityName = "RootDocuments";
@@ -92,6 +93,57 @@ export const useEditFolder = ({ modals, onClose }) => {
   return { editFolder: mutateAsync };
 };
 
+export const useDelete = ({onClose, modals}) => {
+  const queryClient = useQueryClient();
+
+  const handleDeleteEntity = async (data) => {
+    const {folderId, isRoot } = modals.folder;
+    const {isFile } = modals.file;
+    
+    console.log(folderId)
+    const entityName = getLinkInfo(folderId, 2)
+
+   
+    try{
+      isFile? await deleteFile(entityName) : await deleteFolder(entityName, isRoot);
+    }
+    catch(error){
+      console.log(error)
+    }
+    
+  }
+
+  const onSuccess = () => {
+    const {parentFolderId, folderId, isRoot} = modals.folder;
+    const {isFile} = modals.file;
+
+    if (isFile){
+        console.log('deleted')
+    }
+    else{
+      if (isRoot){
+        //if document 
+        const documents = queryClient.getQueryData(EntityName);
+        console.log(documents)
+        queryClient.setQueryData(EntityName, documents.filter(folder =>{ return  folder['@id'] !== folderId}));
+      }
+      else{
+        const _parentFolderName = getLinkInfo(parentFolderId, 2);
+        const parentFolderName = _parentFolderName.includes('_root') ? `FolderChilds:${_parentFolderName.replace('_root', '')}` : `FolderChilds:${_parentFolderName}`;
+        const folders = queryClient.getQueryData(parentFolderName);
+        console.log(folders)
+        queryClient.setQueryData(parentFolderName, folders.filter(folder =>{ return  folder['@id'] !== folderId}));
+      }
+    }
+
+    onClose();
+  }
+
+  const { mutateAsync } = useMutation(handleDeleteEntity, {onSuccess});
+
+  return { handleDeleteEntity: mutateAsync };
+}
+
 /**
  * 
  * @param {*} param0 
@@ -164,6 +216,8 @@ export const useAddRootFolder = ({ onClose, modals }) => {
     onClose();
   };
 
+  
+
   const queryClient = useQueryClient();
   const { mutateAsync, isLoading, error } = useMutation(handleAddFolderFetcher, {
     onSuccess,
@@ -171,3 +225,49 @@ export const useAddRootFolder = ({ onClose, modals }) => {
 
   return { addRootFolder: mutateAsync, isLoading, error };
 };
+
+
+export const useAddFile = ({ onClose, modals }) => {
+
+  const queryClient = useQueryClient();
+
+  const handleAddFileFetcher = async (data) => {
+   const {folderId, isRoot} = modals.folder;
+
+   const folderName = getLinkInfo(folderId, 2)
+
+   try{
+     if (isRoot){
+       console.log(data)
+      const addedFile = await addFile('Document', folderName, data.file, data.filename);
+      return addedFile;
+     }
+     else {
+      const addedFile = await addFile('Folder', folderName, data.file, data.filename);
+      return addedFile;
+     }
+    
+
+   }
+   catch(error){
+     console.log(error)
+   }
+  }
+
+  const onSuccess = (response) => {
+    const {folderId} = modals.folder;
+    const _parentFolderName = getLinkInfo(folderId, 2);
+    const parentFolderName = _parentFolderName.includes('_root') ? `FolderChilds:${_parentFolderName.replace('_root', '')}` : `FolderChilds:${_parentFolderName}`;
+    const folders = queryClient.getQueryData(parentFolderName);
+    queryClient.setQueryData(parentFolderName, [
+      ...folders,
+      response,
+    ]);
+
+    onClose();
+  }
+
+  const { mutateAsync } = useMutation(handleAddFileFetcher, {onSuccess});
+  return {handleAddFileFetcher : mutateAsync}
+  
+}

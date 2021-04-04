@@ -60,9 +60,9 @@ export const useFolderChildren = ({ folder, isRoot }) => {
 
 
   const { data: folderChilds = [] } = useQuery(`${EntityName}:${getLinkInfo(folder["@id"], 2)}`, getFolderItems);
-  const { data: folderData = [] } = useQuery(`FolderData:${getLinkInfo(folder["@id"], 2)}`, getFolderData);
+  // const { data: folderData = [] } = useQuery(`FolderData:${getLinkInfo(folder["@id"], 2)}`, getFolderData);
 
   return { folderChilds,
-     folderData 
+    //  folderData 
     };
 };

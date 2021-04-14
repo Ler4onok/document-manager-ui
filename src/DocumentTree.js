@@ -5,12 +5,13 @@ import { Container, StyledDocumentTreeWrapper } from "./styled";
 import { AddDocumentIcon } from "./components/AddDocumentIcon";
 import { FileInfo } from "./components/FileInfo";
 import { FolderManageModal } from "./components/FolderManageModal";
-import { useDocuments, useAddRootFolder, useEditFolder, useDeleteFolder, useDelete, useAddFile } from "./features/document/hooks";
+import { useDocuments, useAddRootFolder, useEditFolder, useDeleteFolder, useDelete, useAddFile, useUpdateFile } from "./features/document/hooks";
 import { FileManageModal } from "./components/FileManageModal";
 import { Modal } from "./components/Modal";
 
 const initModalState = {
-  folder: { isOpen: false, folderId: null, parentFolderId: null, isRoot: false, isEdit: false, isDelete: false, initialData: {}, fileAdd: false, file: null, fileName: null},
+  folder: { isOpen: false, folderId: null, parentFolderId: null, isRoot: false, isEdit: false, 
+  isDelete: false, initialData: {}, fileAdd: false, file: null, fileName: null, updateType:null, fileInfo:''},
   // file: {isOpen: false, isFile: false, isAdd: false, isInfo: false, initialData: {}}
 
 };
@@ -29,6 +30,7 @@ function DocumentTree() {
   const  { editFolder } = useEditFolder({ modals, onClose});
   const { handleDeleteEntity } = useDelete({ modals, onClose})
   const {handleAddFileFetcher} =  useAddFile({modals, onClose })
+  const {handleUpdateFileFetcher} = useUpdateFile({modals, onClose})
 
   // const handleAddFile = async () => {
   //   // if (selectedFolder.id) {
@@ -62,7 +64,7 @@ function DocumentTree() {
   }
 
   const isAuthorized = !!localStorage.getItem("token");
-  console.log(modals)
+  console.log(modals.folder)
   return (
     <Container>
       <Header isAuthorized={isAuthorized} />
@@ -91,7 +93,7 @@ function DocumentTree() {
           <h1
             style={{ marginLeft: "10%", display: "flex", alignItems: "center" }}
           >
-            Directories
+            Documents
           </h1>
 
 
@@ -110,16 +112,17 @@ function DocumentTree() {
             onClose={onClose}
             handleSubmit={handleDeleteEntity}
             isDelete={modals.folder.isDelete}
-            />
+            header='Delete the entity'
+            ><div>Do you want to delete this entity?</div></Modal>
           )}
 
           {/* FILE */}
 
           {modals.folder.fileAdd && (
-          <FileManageModal onClose={onClose} handleSubmit={handleAddFileFetcher} initialData={modals.folder.initialData}/>
+          <FileManageModal onClose={onClose} handleSubmit={modals.folder.updateType === null? handleAddFileFetcher: handleUpdateFileFetcher} initialData={modals.folder.initialData}/>
           )}
 
-          {isOpenFileInfoModal && <FileInfo fileInfo={fileInfo} />}
+          {isOpenFileInfoModal && <FileInfo fileInfo={fileInfo} setModals={setModals}/>}
 
 
           <StyledDocumentTreeWrapper>
@@ -133,7 +136,8 @@ function DocumentTree() {
                     parentFolderId: null,
                     isRoot: true,
                     isEdit: false,
-                    initialData: {}
+                    initialData: {},
+                    updateType: null,
                   },
                   file: {
                     isOpen: false,

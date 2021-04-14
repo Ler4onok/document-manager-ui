@@ -11,16 +11,12 @@ import {
 
 import downloadIcon from '../../assets/download.svg';
 import addVersionIcon from '../../assets/plus_versions.svg';
+import { getLinkInfo } from "../../features/document/utils";
+import { getFileVersions } from "../../features/document";
 
-export const FileInfo = ({ fileInfo }) => {
+export const FileInfo = ({ fileInfo, setModals }) => {
   const [isVersionsOpen, setVersionsOpen] = useState(false);
   const [fileVersions, setFileVersions] = useState([]);
-
-  // const handleFileUpdate = (updateType) => {
-  //   setOpenFileModal(true);
-  //   const fileName = getLinkInfo(fileInfo["@id"], 2);
-  //   updateFile(file, fileName, updateType);
-  // };
 
   return (
     <StyledFileInfo>
@@ -44,16 +40,16 @@ export const FileInfo = ({ fileInfo }) => {
       </StyledFileCharacteristicsWrapper>
       <StyledVersionsHeaderWrapper>
         <StyledVersionsHeader
-          // onClick={async () => {
-          //   const _fileVersions = await getFileVersions(
-          //     getLinkInfo(fileInfo["@id"], 2)
-          //   );
-          //   const reversedFileVersions = _fileVersions
-          //     .map((version) => version)
-          //     .reverse();
-          //   setFileVersions(reversedFileVersions);
-          //   setVersionsOpen(!isVersionsOpen);
-          // }}
+          onClick={async () => {
+            const _fileVersions = await getFileVersions(
+              getLinkInfo(fileInfo["@id"], 2)
+            );
+            const reversedFileVersions = _fileVersions
+              .map((version) => version)
+              .reverse().reverse();
+            setFileVersions(reversedFileVersions);
+            setVersionsOpen(!isVersionsOpen);
+          }}
         >
           {isVersionsOpen ? "Hide" : "Show"} file versions
         </StyledVersionsHeader>
@@ -64,9 +60,15 @@ export const FileInfo = ({ fileInfo }) => {
           right={0}
           top="-3px"
           transform="scale(0.6)"
-          // onClick={() => {
-          //   handleFileUpdate("content");
-          // }}
+          onClick={() => {
+            setModals({
+              folder: {
+                fileAdd: true,
+                updateType: 'content', 
+                fileInfo: fileInfo
+              },
+            });
+          }}
         />
       </StyledVersionsHeaderWrapper>
       {isVersionsOpen &&

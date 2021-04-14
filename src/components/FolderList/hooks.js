@@ -9,7 +9,6 @@ export const useFolderChildren = ({ folder, isRoot }) => {
   const getFolderData = async () => {
     const folderId = getLinkInfo(folder["@id"], 2);
     const _folderData = await getFolderByURI(folderId);
-    console.log(_folderData);
     return _folderData;
   }
 

@@ -200,8 +200,6 @@ const FolderItem = memo(({
                     getLinkInfo(folder["@id"], 2)
                   );
                   setFileInfo(fileInfo);
-
-                  // console.log(fileInfo);
                   setOpenFileInfoModal(true);
                 }}
               />

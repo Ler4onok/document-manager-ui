@@ -15,8 +15,7 @@ export const getDocumentList = async () => {
 
 export const getSubfolders = async (url) => {
   const token = localStorage.getItem("token");
-  console.log("get subfolders");
-  console.log(url);
+ 
   try {
     const subfoldersList = await request(url, "GET", null, {
       Authorization: `Bearer ${token}`,
@@ -140,7 +139,6 @@ export const addFolder = async (
           isRoot ? "_root" : ""
         }/subfolders?namespace=http://example.cz/Folder`;
 
-  console.log(type);
   try {
     const folder = await request(
       `${typpe}`,

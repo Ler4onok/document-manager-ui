@@ -1,6 +1,6 @@
 // const cache = new Map(); // stale-while-revalidate
 
-export const request = async (
+export const request =  async (
   url,
   method = "GET",
   body = null,

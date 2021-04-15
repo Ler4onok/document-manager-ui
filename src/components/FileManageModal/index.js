@@ -30,7 +30,7 @@ const FileManageModal = ({initialData={}, handleSubmit, onClose}) => {
     <Modal
       handleSubmit={onSubmit}
       onClose={onClose}
-      header="Add a new file"
+      header="Add a file"
       // newObject={newFile}
     >
       <input

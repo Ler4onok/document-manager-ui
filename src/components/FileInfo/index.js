@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import ContentEditable from "react-contenteditable";
 
 import {
   StyledFileCharacteristic,
@@ -7,37 +8,108 @@ import {
   StyledIcon,
   StyledVersionsHeader,
   StyledVersionsHeaderWrapper,
-} from './styled';
+} from "./styled";
 
-import downloadIcon from '../../assets/download.svg';
-import addVersionIcon from '../../assets/plus_versions.svg';
+import downloadIcon from "../../assets/download.svg";
+import addVersionIcon from "../../assets/plus_versions.svg";
 import { getLinkInfo } from "../../features/document/utils";
-import { getFileVersions } from "../../features/document";
+import { getFileContent, getFileVersions } from "../../features/document";
+import fileIcon from "../FolderList/assets/file_simple.svg";
+import editIcon from "../FolderList/assets/edit.svg";
+import { updateFile } from "../../features/document/api";
 
 export const FileInfo = ({ fileInfo, setModals }) => {
   const [isVersionsOpen, setVersionsOpen] = useState(false);
   const [fileVersions, setFileVersions] = useState([]);
+  const [isEditDisabled, setEditDisabled] = useState(true);
+  const [newFileName, setNewFileName] = useState(
+    fileInfo["http://example.cz/name"]
+  );
+  const fileNameRef = useRef(null);
+
+  const handleChange = (event) => {
+    setNewFileName(event.target.value);
+
+  };
+
+  const handleChangeFileName = () => {
+    setEditDisabled(true);
+    const currentFileName = getLinkInfo(fileInfo["@id"], 2);
+    console.log({newFileName, currentFileName})
+    updateFile(newFileName, currentFileName, "");
+  };
 
   return (
     <StyledFileInfo>
-      <h1 style={{ margin: 0, color: "#2196f3" }}>File information</h1>
-      <StyledFileCharacteristicsWrapper
+      <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          padding: "20px",
+          background: "#2196f3",
+          width: "100%",
+          textAlign: "center",
+          boxShadow: " rgb(189 189 189) 5px 5px 10px -1px",
         }}
       >
-        <StyledFileCharacteristic>
-          <b>File name</b>: {fileInfo["http://example.cz/name"]}
-        </StyledFileCharacteristic>
-        <StyledFileCharacteristic>
-          <b>File type</b>: {fileInfo["http://example.cz/fileType"]}
-        </StyledFileCharacteristic>
-        <StyledFileCharacteristic>
-          <b>File version</b>: {fileInfo["http://example.cz/version"]}
-        </StyledFileCharacteristic>
-      </StyledFileCharacteristicsWrapper>
+        <h1 style={{ margin: 0, color: "white", fontSize: "20px" }}>
+          File information
+        </h1>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "75%",
+          padding: "20px",
+        }}
+      >
+        <StyledIcon
+          position="relative"
+          src={fileIcon}
+          style={{ transform: "scale(1.5)" }}
+        />
+        <StyledFileCharacteristicsWrapper
+          style={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <StyledFileCharacteristic
+            style={{ display: "flex", alignItems: "center" }}
+          >
+            <b>File name:</b>{" "}
+            <ContentEditable
+              suppressContentEditableWarning={true}
+              disabled={isEditDisabled}
+              innerRef={fileNameRef}
+              html={newFileName}
+              onChange={handleChange}
+              onBlur={handleChangeFileName}
+            />
+            <StyledIcon
+              position="relative"
+              src={editIcon}
+              style={{ transform: "scale(0.5)" }}
+              onClick={() => {
+                setEditDisabled(!isEditDisabled);
+                setTimeout(() => {
+                  fileNameRef.current.focus();
+                }, 0);
+              }}
+            />
+          </StyledFileCharacteristic>
+          <StyledFileCharacteristic>
+            <b>File type</b>: {fileInfo["http://example.cz/fileType"]}
+          </StyledFileCharacteristic>
+          <StyledFileCharacteristic>
+            <b>File version</b>: {fileInfo["http://example.cz/version"]}
+          </StyledFileCharacteristic>
+          <StyledFileCharacteristic>
+            <b>Date created</b>: {fileInfo["http://example.cz/created"]}
+          </StyledFileCharacteristic>
+        </StyledFileCharacteristicsWrapper>
+      </div>
+
       <StyledVersionsHeaderWrapper>
         <StyledVersionsHeader
           onClick={async () => {
@@ -46,7 +118,8 @@ export const FileInfo = ({ fileInfo, setModals }) => {
             );
             const reversedFileVersions = _fileVersions
               .map((version) => version)
-              .reverse().reverse();
+              .reverse()
+              .reverse();
             setFileVersions(reversedFileVersions);
             setVersionsOpen(!isVersionsOpen);
           }}
@@ -64,8 +137,8 @@ export const FileInfo = ({ fileInfo, setModals }) => {
             setModals({
               folder: {
                 fileAdd: true,
-                updateType: 'content', 
-                fileInfo: fileInfo
+                updateType: "content",
+                fileInfo: fileInfo,
               },
             });
           }}
@@ -93,24 +166,24 @@ export const FileInfo = ({ fileInfo, setModals }) => {
               right="5%"
               top="40%"
               src={downloadIcon}
-              // onClick={async () => {
-              //   const fileName = getLinkInfo(fileInfo["@id"], 2);
-              //   const fileContent = await getFileContent(
-              //     fileName,
-              //     version["http://example.cz/version"]
-              //   );
-              //   const url = URL.createObjectURL(new Blob([fileContent]));
-              //   const link = document.createElement("a");
-              //   link.href = url;
-              //   link.setAttribute(
-              //     "download",
-              //     `${fileInfo["http://example.cz/fileName"]}`
-              //   );
+              onClick={async () => {
+                const fileName = getLinkInfo(fileInfo["@id"], 2);
+                const fileContent = await getFileContent(
+                  fileName,
+                  version["http://example.cz/version"]
+                );
+                const url = URL.createObjectURL(new Blob([fileContent]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute(
+                  "download",
+                  `${fileInfo["http://example.cz/fileName"]}`
+                );
 
-              //   document.body.appendChild(link);
-              //   link.click();
-              //   link.parentNode.removeChild(link);
-              // }}
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode.removeChild(link);
+              }}
             />
           </div>
         ))}

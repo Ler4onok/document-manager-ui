@@ -31,8 +31,9 @@ const FolderList = ({
   setFileInfo,
   setModifierModal,
   isRoot = false,
+  parentId=null
 }) => {
-  console.log(list)
+  console.log({parentId})
   return (
     <div style={{ width: "fit-content" }}>
       {list.map((folder) => (
@@ -44,6 +45,7 @@ const FolderList = ({
           // setOpenFileModal={setOpenFileModal}
           setOpenFileInfoModal={setOpenFileInfoModal}
           setFileInfo={setFileInfo}
+          parentId={parentId}
         />
       ))}
     </div>
@@ -57,11 +59,13 @@ const FolderItem = memo(({
   // setOpenFileModal,
   setOpenFileInfoModal,
   setFileInfo,
+  parentId
 }) => {
   const { folderChilds } = useFolderChildren({ isRoot, folder })
 
   const [isOpen, setOpen] = useState(false);
   const [_opacity, setOpacity] = useState(0);
+  const [currentFolder, setCurrentFolder] = useState(folder);
 
   const handleDeleteFolder = async () => {
     await deleteFolder(getLinkInfo(folder["@id"], 2), isRoot);
@@ -71,10 +75,10 @@ const FolderItem = memo(({
     await deleteFile(getLinkInfo(folder["@id"], 2));
   };
 
-  const onOpenFolder = (event) => {
-    event.stopPropagation();
-    if (folderChilds.length > 0) setOpen(!isOpen);
-  };
+  // const onOpenFolder = (event) => {
+  //   event.stopPropagation();
+  //   if (folderChilds.length > 0) setOpen(!isOpen);
+  // };
 
   const onMouseEnter = (e) => {
     e.stopPropagation();
@@ -87,7 +91,6 @@ const FolderItem = memo(({
   };
 
   const hasChildren = isOpen && folderChilds.length > 0;
-
   return (
     <div>
       <StyledFolderItem
@@ -105,7 +108,13 @@ const FolderItem = memo(({
             <StyledIcon src={fileIcon} />
           )}
 
-          <div onClick={onOpenFolder}>{folder["http://example.cz/name"]}</div>
+          <div onClick={(event) => {
+              console.log(folder)
+              event.stopPropagation();
+              if (folderChilds.length > 0) setOpen(!isOpen);
+              setCurrentFolder(folder);
+              console.log(currentFolder)
+          }}>{folder["http://example.cz/name"]}</div>
           {(getLinkInfo(folder["@id"], 1) === "Folder" ||
             getLinkInfo(folder["@id"], 1) === "Document") && (
             <StyledIconWrapper opacity={_opacity}>
@@ -135,7 +144,8 @@ const FolderItem = memo(({
                       folderId: folder['@id'],
                       parentFolderId: isRoot? null : folder['http://example.cz/parentFolder']["@id"],
                       isRoot,
-                      fileAdd: true
+                      fileAdd: true,
+                      updateType: null
                     },
                     file: {
                       isOpen: true,
@@ -226,11 +236,12 @@ const FolderItem = memo(({
                 src={deleteFolderIcon}
                 title="Delete a file"
                 onClick={() => {
+                  console.log(currentFolder['@id'])
                   setModals({
                     folder: {
                       isOpen: false,
                       folderId: folder['@id'],
-                      // parentFolderId: isRoot? null : folder['http://example.cz/parentFolder']["@id"],
+                      parentFolderId: parentId,
                       isEdit: false,
                       isDelete: true,
                       isRoot,
@@ -255,6 +266,7 @@ const FolderItem = memo(({
             setOpenFileInfoModal={setOpenFileInfoModal}
             setFileInfo={setFileInfo}
             setModals={setModals}
+            parentId={folder['@id']}
           />
         )}
       </StyledFolderItem>

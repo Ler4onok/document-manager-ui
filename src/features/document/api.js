@@ -213,26 +213,60 @@ export const updateFolder = async ({ url, id, values, type }) => {
   }
 }
 
-export const updateFile = (newfile, fileName, updateType) => {
+export const updateFile = (newData, fileName, updateType) => {
   const token = localStorage.getItem("token");
-  const url = `files/${fileName}/${updateType}?namespace=http://example.cz/File`;
 
-  const formData = new FormData();
-  formData.append("file", newfile);
+  if (updateType === 'content'){
+    const url = `files/${fileName}/${updateType}?namespace=http://example.cz/File`;
+    const formData = new FormData();
+    formData.append("file", newData);
 
-  try {
-    return request(
-      url,
-      "PUT",
-      formData,
-      {
-        Authorization: `Bearer ${token}`,
-      },
-      true
-    );
-  } catch (error) {
-    throw error;
+    try {
+      return request(
+        url,
+        "PUT",
+        formData,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        true
+      );
+    } catch (error) {
+      throw error;
+    }
+    
   }
+  else{
+    const url = `files/${fileName}?namespace=http://example.cz/File`;
+    console.log(newData)
+    console.log(fileName)
+    try {
+      return request(
+        url,
+        "PUT",
+        {
+          "@id": `http://example.cz/File/${fileName}`,
+          "@type": [
+              "http://example.cz/File",
+              "http://example.cz/Node"
+          ],
+          "http://example.cz/name": `${newData}`
+      },
+        {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/ld+json'
+
+        },
+        false
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  
+
+  
 };
 
 // DELETE

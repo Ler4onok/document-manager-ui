@@ -2,7 +2,7 @@ import { Button, FormControl, InputLabel, Select, TextField, MenuItem } from '@m
 import React, { useState } from 'react';
 import { Modal } from '../Modal';
 
-const FolderManageModal = ({ initialData = {}, handleSubmit, onClose }) => {
+const FolderManageModal = ({ initialData = {}, handleSubmit, onClose, eventType}) => {
   const [error, setError] = useState(null);
   const [isOpenPermissionOptions, setOpenPermissionOptions] = useState(null);
   const [folderFields, setFolderFields] = useState({
@@ -23,7 +23,7 @@ const FolderManageModal = ({ initialData = {}, handleSubmit, onClose }) => {
     <Modal
       handleSubmit={onSubmit}
       onClose={onClose}
-      // header={`${newFolder.event} a ${newFolder.type.toLowerCase()}`}
+      header={eventType + ' a folder'}
     >
       <div className="modalContent" style={{ width: "89%" }}>
         <TextField

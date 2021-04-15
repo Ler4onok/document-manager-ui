@@ -116,25 +116,22 @@ export const useDelete = ({onClose, modals}) => {
 
 
     if (isFile){
-        // const _parentFolderName = getLinkInfo(parentFolderId, 2);
-        // const parentFolderName = _parentFolderName.includes('_root') ? `FolderChilds:${_parentFolderName.replace('_root', '')}` : `FolderChilds:${_parentFolderName}`;
-        // const folders = queryClient.getQueryData(parentFolderName);
-        // console.log(folders)
-        // queryClient.setQueryData(parentFolderName, folders.filter(folder =>{ return  folder['@id'] !== folderId}));
+        const _parentFolderName = getLinkInfo(parentFolderId, 2);
+        const parentFolderName = `FolderChilds:${_parentFolderName}`;
+        const folders = queryClient.getQueryData(parentFolderName);
+        queryClient.setQueryData(parentFolderName, folders.filter(folder =>  folder['@id'] !== folderId));
     }
     else{
       if (isRoot){
         //if document 
         const documents = queryClient.getQueryData(EntityName);
-        console.log(documents)
-        queryClient.setQueryData(EntityName, documents.filter(folder =>{ return  folder['@id'] !== folderId}));
+        queryClient.setQueryData(EntityName, documents.filter(folder => folder['@id'] !== folderId));
       }
       else{
         const _parentFolderName = getLinkInfo(parentFolderId, 2);
         const parentFolderName = _parentFolderName.includes('_root') ? `FolderChilds:${_parentFolderName.replace('_root', '')}` : `FolderChilds:${_parentFolderName}`;
         const folders = queryClient.getQueryData(parentFolderName);
-        console.log(folders)
-        queryClient.setQueryData(parentFolderName, folders.filter(folder =>{ return  folder['@id'] !== folderId}));
+        queryClient.setQueryData(parentFolderName, folders.filter(folder =>folder['@id'] !== folderId));
       }
     }
 
@@ -227,8 +224,8 @@ export const useAddRootFolder = ({ onClose, modals }) => {
 export const useUpdateFile = ({ onClose, modals}) => {
   const queryClient = useQueryClient();
 
-  const filename = modals.folder.fileInfo === null ?  getLinkInfo(modals.folder.fileInfo['@id'], 2) : ''
   const handleUpdateFileFetcher = async (data) => {
+    const filename = getLinkInfo(modals.folder.fileInfo['@id'], 2);
 
     try{
       const updatedFile = updateFile(data.file, filename, modals.folder.updateType)

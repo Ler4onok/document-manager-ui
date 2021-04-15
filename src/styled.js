@@ -33,7 +33,7 @@ export const StyledIcon = styled.img`
 
 export const StyledFileInfo = styled.div`
   position: absolute;
-  height: 400px;
+  height: 450px;
   overflow: auto;
   overflow-x: hidden;
   z-index: 10;
@@ -42,7 +42,6 @@ export const StyledFileInfo = styled.div`
   width: 30%;
   border: 1px solid #8080803b;
   border-radius: 25px;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;

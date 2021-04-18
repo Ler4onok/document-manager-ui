@@ -22,22 +22,19 @@ export const FileInfo = ({ fileInfo, setModals }) => {
   const [isVersionsOpen, setVersionsOpen] = useState(false);
   const [fileVersions, setFileVersions] = useState([]);
   const [isEditDisabled, setEditDisabled] = useState(true);
-  const [newFileName, setNewFileName] = useState(
-    fileInfo["http://example.cz/name"]
-  );
-  const fileNameRef = useRef(null);
+  const text = useRef(fileInfo["http://example.cz/name"]);
 
-  const handleChange = (event) => {
-    setNewFileName(event.target.value);
-
+  const handleChange = event => {
+      text.current = event.target.value;
   };
-
-  const handleChangeFileName = () => {
-    setEditDisabled(true);
+  
+  const handleBlur = () => {
+    setEditDisabled(false)
     const currentFileName = getLinkInfo(fileInfo["@id"], 2);
-    console.log({newFileName, currentFileName})
-    updateFile(newFileName, currentFileName, "");
+    updateFile(text.current, currentFileName, "");
   };
+
+    
 
   return (
     <StyledFileInfo>
@@ -79,12 +76,12 @@ export const FileInfo = ({ fileInfo, setModals }) => {
           >
             <b>File name:</b>{" "}
             <ContentEditable
-              suppressContentEditableWarning={true}
+              // suppressContentEditableWarning={true}
               disabled={isEditDisabled}
-              innerRef={fileNameRef}
-              html={newFileName}
+              html={text.current}
+              // innerRef={text}
               onChange={handleChange}
-              onBlur={handleChangeFileName}
+              onBlur={handleBlur}
             />
             <StyledIcon
               position="relative"
@@ -92,9 +89,11 @@ export const FileInfo = ({ fileInfo, setModals }) => {
               style={{ transform: "scale(0.5)" }}
               onClick={() => {
                 setEditDisabled(!isEditDisabled);
-                setTimeout(() => {
-                  fileNameRef.current.focus();
-                }, 0);
+                // text.current.focus();
+                // setTimeout(() => {
+                //   // text.current.focus();
+                // }, 0);
+                
               }}
             />
           </StyledFileCharacteristic>

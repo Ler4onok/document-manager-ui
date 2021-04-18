@@ -134,6 +134,7 @@ function DocumentTree() {
               handleSubmit={modals.folder.isEdit ? editFolder : addRootFolder}
               initialData={modals.folder.initialData}
               eventType={modals.folder.isEdit ? 'Edit' : 'Add'}
+              folderId={modals.folder.folderId}
             />
           )}
 

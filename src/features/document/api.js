@@ -87,6 +87,21 @@ export const getFileContent = async (fileName, version) => {
   }
 };
 
+export const getDocumentPermissions =  (documentId) => {
+  const token = localStorage.getItem("token");
+  const url = `documents/${documentId}/permissions/user?namespace=http://example.cz/Document`;
+  try {
+    const userPermissions =  request(url, "GET", null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    return userPermissions;
+  } catch (error) {
+    return error;
+  }
+};
+
+
 // POST
 export const addFile = async (entityType, folder, newFile, fileName) => {
   const token = localStorage.getItem("token");

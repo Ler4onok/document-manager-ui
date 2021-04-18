@@ -30,6 +30,15 @@ export const useEditFolder = ({ modals, onClose }) => {
     const url = `${reqType}/${id}?namespace=http://example.cz/${type}`;
 
     const editedFolderResponse = await updateFolder({ url, id, values, type });
+
+    if (values.userURI !== '' && values.permissionLevel !== ''){
+      try{
+        await addUserPermission(values.name.trim().replace(/\s/g, ""), values.permissionLevel, values.userURI)
+      }
+      catch (e) {
+        console.log(e);
+      }
+    }
     // handleAddUserPermission(id);
     // onClose();
     return editedFolderResponse;

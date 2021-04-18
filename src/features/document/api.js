@@ -312,3 +312,18 @@ export const deleteFile = async (fileName) => {
     throw error;
   }
 };
+
+export const deleteUserPermission = async (permissionId) => {
+  const token = localStorage.getItem("token");
+  const url = `permissions/user/${permissionId}?namespace=http://example.cz/UserPermission`;
+
+  try {
+    return await request(url, "DELETE", null, {
+      Authorization: `Bearer ${token}`,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+

@@ -23,6 +23,7 @@ const FolderManageModal = ({
   onClose,
   eventType,
   folderId = null,
+  handleDeleteUserPermission
 }) => {
   const [error, setError] = useState(null);
   const [isOpenPermissionOptions, setOpenPermissionOptions] = useState(null);
@@ -112,7 +113,7 @@ const FolderManageModal = ({
                       </div>
                       <div>Access Level: {item["http://example.cz/level"]}</div>
                     </div>
-                    <Button variant="outlined" color="secondary" style={{height: '40px'}}>
+                    <Button variant="outlined" color="secondary" style={{height: '40px'}} onClick={() => handleDeleteUserPermission(item['@id'])}>
                       Delete
                     </Button>
                   </StyledPermissionsItemWrapper>

@@ -8,6 +8,8 @@ import { FolderManageModal } from "./components/FolderManageModal";
 import { useDocuments, useAddRootFolder, useEditFolder, useDeleteFolder, useDelete, useAddFile, useUpdateFile } from "./features/document/hooks";
 import { FileManageModal } from "./components/FileManageModal";
 import { Modal } from "./components/Modal";
+import { getLinkInfo } from "./features/document/utils";
+import { deleteUserPermission } from "./features/document/api";
 
 const initModalState = {
   folder: { isOpen: false, folderId: null, parentFolderId: null, isRoot: false, isEdit: false, current: null,
@@ -54,6 +56,11 @@ function DocumentTree() {
   // ) => {
   //   addUserPermission(id, newFolder.permissionLevel, newFolder.userURI);
   // };
+
+  const handleDeleteUserPermission =  (id) => {
+    const permissionId = getLinkInfo(id, 2)
+    deleteUserPermission(permissionId) 
+  }
   
   if (error) {
     return <div>Error</div>;
@@ -135,6 +142,7 @@ function DocumentTree() {
               initialData={modals.folder.initialData}
               eventType={modals.folder.isEdit ? 'Edit' : 'Add'}
               folderId={modals.folder.folderId}
+              handleDeleteUserPermission={handleDeleteUserPermission}
             />
           )}
 

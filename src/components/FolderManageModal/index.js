@@ -10,12 +10,12 @@ import React, { useState, useEffect } from "react";
 import { getDocumentPermissions } from "../../features/document/api";
 import { getLinkInfo } from "../../features/document/utils";
 import { Modal } from "../Modal";
-import {
-  StyledAddPermissionsWrapper,
-  StyledPermissionsItemWrapper,
-  StyledPermissionsTitle,
-  StyledPermissionsWrapper,
-} from "./styled";
+// import {
+//   StyledAddPermissionsWrapper,
+//   StyledPermissionsItemWrapper,
+//   StyledPermissionsTitle,
+//   StyledPermissionsWrapper,
+// } from "./styled";
 
 const FolderManageModal = ({
   initialData = {},
@@ -92,7 +92,7 @@ const FolderManageModal = ({
         >
           Manage user permissions
         </div>
-        {isOpenPermissionOptions && (
+        {/* {isOpenPermissionOptions && (
           <div
             style={{
               display: "flex",
@@ -163,7 +163,7 @@ const FolderManageModal = ({
               </Button>
             </StyledAddPermissionsWrapper>
           </div>
-        )}
+        )} */}
       </div>
     </Modal>
   );

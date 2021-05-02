@@ -1,17 +1,12 @@
+import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { getFiles, getSubfolders, getFolderByURI } from "../../features/document";
+import { getDocumentPermissions } from "../../features/document/api";
 import { getLinkInfo } from "../../features/document/utils";
 
 const EntityName = 'FolderChilds';
 
 export const useFolderChildren = ({ folder, isRoot }) => {
-
-  const getFolderData = async () => {
-    const folderId = getLinkInfo(folder["@id"], 2);
-    const _folderData = await getFolderByURI(folderId);
-    return _folderData;
-  }
-
 
   const getSubfolderList = async () => {
     const folderId = getLinkInfo(folder["@id"], 2);
@@ -59,9 +54,27 @@ export const useFolderChildren = ({ folder, isRoot }) => {
 
 
   const { data: folderChilds = [] } = useQuery(`${EntityName}:${getLinkInfo(folder["@id"], 2)}`, getFolderItems);
-  // const { data: folderData = [] } = useQuery(`FolderData:${getLinkInfo(folder["@id"], 2)}`, getFolderData);
 
-  return { folderChilds,
-    //  folderData 
-    };
+  return { folderChilds };
+};
+
+export const useFolderPermission = ({ isRoot, document }) => {
+  const [level, setLevel] = useState(null);
+  
+  const getUserPermissions = async () => {
+    const documentId = getLinkInfo(document['@id'], 2);
+    const users = await getDocumentPermissions(documentId);
+    const currentUser = localStorage.getItem('currentUserUri');
+    // http://example.org/users/Administrator+One
+    const permissionLevel = users.find(user => user['http://example.cz/userUri'] === currentUser)['http://example.cz/level'];
+    setLevel(permissionLevel);
+  };
+  
+  useEffect(() => {
+    if (isRoot) {
+      getUserPermissions();
+    }
+  }, [document, isRoot]);
+
+  return { level };
 };

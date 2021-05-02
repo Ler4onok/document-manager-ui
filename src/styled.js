@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-  font-family: "Open Sans", sans-serif;
+font-family: 'Montserrat', sans-serif;
   color: black;
   height: 100%;
   background: #f4f4f2;

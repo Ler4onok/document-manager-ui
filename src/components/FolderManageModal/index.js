@@ -1,21 +1,9 @@
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  TextField,
-  MenuItem,
-} from "@material-ui/core";
+import { TextField } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { getDocumentPermissions } from "../../features/document/api";
 import { getLinkInfo } from "../../features/document/utils";
+import { ManagePermissions } from "../ManagePermissions";
 import { Modal } from "../Modal";
-// import {
-//   StyledAddPermissionsWrapper,
-//   StyledPermissionsItemWrapper,
-//   StyledPermissionsTitle,
-//   StyledPermissionsWrapper,
-// } from "./styled";
 
 const FolderManageModal = ({
   initialData = {},
@@ -23,7 +11,8 @@ const FolderManageModal = ({
   onClose,
   eventType,
   folderId = null,
-  handleDeleteUserPermission
+  handleDeleteUserPermission,
+  isRoot,
 }) => {
   const [error, setError] = useState(null);
   const [isOpenPermissionOptions, setOpenPermissionOptions] = useState(null);
@@ -32,17 +21,22 @@ const FolderManageModal = ({
     description: initialData.description || "",
     userURI: initialData.userURI || "",
     permissionLevel: initialData.permissionLevel || "",
-    // type: initialData.type || '',
   });
-
-  const [userPermissions, setUserPermissions] = useState([]);
+  const [userRights, setUserRights] = useState("");
 
   useEffect(() => {
     if (folderId) {
       const documentId = getLinkInfo(folderId, 2);
-      const userPermissions = getDocumentPermissions(
-        documentId
-      ).then((result) => setUserPermissions(result));
+      getDocumentPermissions(documentId).then((permissionsList) => {
+        permissionsList.forEach((perm) => {
+          if (
+            perm["http://example.cz/userUri"] ===
+            localStorage.getItem("currentUserUri")
+          ) {
+            setUserRights(perm["http://example.cz/level"]);
+          }
+        });
+      });
     }
   }, []);
 
@@ -51,7 +45,6 @@ const FolderManageModal = ({
   };
 
   const onSubmit = () => handleSubmit(folderFields);
-  console.log(userPermissions);
   return (
     <Modal
       handleSubmit={onSubmit}
@@ -62,7 +55,7 @@ const FolderManageModal = ({
         <TextField
           style={{
             width: "100%",
-            marginBottom: "5px",
+            marginBottom: "10px",
             marginTop: "10px",
           }}
           id="outlined-basic"
@@ -81,89 +74,28 @@ const FolderManageModal = ({
           onChange={(event) => handleInput(event, "description")}
         />
         {error != null && <div style={{ color: "red" }}>{error}</div>}
-        <div
-          style={{
-            textAlign: "center",
-            cursor: "pointer",
-            color: "#2196f3",
-            marginBottom: "10px",
-          }}
-          onClick={() => setOpenPermissionOptions(!isOpenPermissionOptions)}
-        >
-          Manage user permissions
-        </div>
-        {/* {isOpenPermissionOptions && (
+        {eventType === "Edit" && isRoot && <div style={{marginBottom: '10px', textAlign: 'center'}}>Your access level is {userRights}</div>}
+
+        {userRights === "SECURITY" && eventType === "Edit" && isRoot && (
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              flexDirection: "column",
+              textAlign: "center",
+              cursor: "pointer",
+              color: "#2196f3",
+              // marginBottom: "10px",
             }}
+            onClick={() => setOpenPermissionOptions(!isOpenPermissionOptions)}
           >
-            <StyledPermissionsTitle>Permissions</StyledPermissionsTitle>
-            {userPermissions.length > 0 ? 
-            <StyledPermissionsWrapper>
-              {userPermissions.map((item) => {
-                return (
-                  <StyledPermissionsItemWrapper>
-                    <div>
-                      <div>
-                        User URI:{" "}
-                        {getLinkInfo(item["http://example.cz/userUri"], 2)}
-                      </div>
-                      <div>Access Level: {item["http://example.cz/level"]}</div>
-                    </div>
-                    <Button variant="outlined" color="secondary" style={{height: '40px'}} onClick={() => handleDeleteUserPermission(item['@id'])}>
-                      Delete
-                    </Button>
-                  </StyledPermissionsItemWrapper>
-                );
-              })}
-            </StyledPermissionsWrapper>: <div>There are no user permissions yet</div>}
-
-            <StyledPermissionsTitle>
-              Add user permissions
-            </StyledPermissionsTitle>
-            <StyledAddPermissionsWrapper>
-              <TextField
-                id="outlined-basic"
-                label="User URI"
-                variant="outlined"
-                value={folderFields.userURI}
-                onChange={(event) => handleInput(event, "userURI")}
-              />
-              <FormControl
-                style={{ width: "40%", margin: "0px 40px 0px 15px" }}
-              >
-                <InputLabel id="demo-simple-select-label">
-                  Permission Level
-                </InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={folderFields.permissionLevel}
-                  onChange={(event) => {
-                    handleInput(event, "permissionLevel");
-                    // setUserPermission(event.target.value);
-                  }}
-                >
-                  <MenuItem value={"NONE"}>None</MenuItem>
-                  <MenuItem value={"READ"}>Read</MenuItem>
-                  <MenuItem value={"WRITE"}>Write</MenuItem>
-                  <MenuItem value={"SECURITY"}>Security</MenuItem>
-                </Select>
-              </FormControl>
-              <Button
-                variant="outlined"
-                color="primary"
-                style={{ color: "#2196f3", height: "35px" }}
-                // onClick={() => handleAddUserPermission("Add")}
-              >
-                Add
-              </Button>
-            </StyledAddPermissionsWrapper>
+            Manage user permissions
           </div>
-        )} */}
+        )}
+        {isOpenPermissionOptions && (
+          <ManagePermissions
+            initialData={initialData}
+            folderId={folderId}
+            handleDeleteUserPermission={handleDeleteUserPermission}
+          />
+        )}
       </div>
     </Modal>
   );

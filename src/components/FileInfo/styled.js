@@ -11,7 +11,6 @@ export const StyledFileInfo = styled.div`
   width: 30%;
   border: 1px solid #8080803b;
   border-radius: 25px;
-  /* padding: 20px; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,8 +23,15 @@ export const StyledFileCharacteristicsWrapper = styled.div`
 `;
 
 export const StyledFileCharacteristic = styled.div`
-  /* text-align: center; */
+  display: flex;
+  align-items: center;
 `;
+
+export const StyledFileCharacteristicTitle = styled.div`
+  margin-right: 5px;
+  font-weight: 700;
+`;
+
 
 export const StyledVersionsHeaderWrapper = styled.div`
   position: relative;

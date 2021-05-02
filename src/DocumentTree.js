@@ -9,11 +9,12 @@ import { useDocuments, useAddRootFolder, useEditFolder, useDeleteFolder, useDele
 import { FileManageModal } from "./components/FileManageModal";
 import { Modal } from "./components/Modal";
 import { getLinkInfo } from "./features/document/utils";
-import { deleteUserPermission } from "./features/document/api";
+import { deleteUserPermission, getCurrentUser } from "./features/document/api";
 
 const initModalState = {
   folder: { isOpen: false, folderId: null, parentFolderId: null, isRoot: false, isEdit: false, current: null,
-  isDelete: false, initialData: {}, fileAdd: false, file: null, fileName: null, updateType:null, fileInfo:''},
+  isDelete: false, initialData: {}, fileAdd: false, file: null, fileName: null, updateType:null, fileInfo:'',
+  userLevel: ''},
   // file: {isOpen: false, isFile: false, isAdd: false, isInfo: false, initialData: {}}
 
 };
@@ -34,28 +35,10 @@ function DocumentTree() {
   const {handleAddFileFetcher} =  useAddFile({modals, onClose })
   const {handleUpdateFileFetcher} = useUpdateFile({modals, onClose})
 
-  // const handleAddFile = async () => {
-  //   // if (selectedFolder.id) {
-  //   //   const parentFolderName = getLinkInfo(selectedFolder.id, 2);
-  //   //   const entityType = getLinkInfo(selectedFolder.id, 1);
+  useEffect(()=> {
+    getCurrentUser().then(user => localStorage.setItem('currentUserUri', user['uri'])); 
+  }, [])
 
-  //   //   try {
-  //   //     const _file = await addFile(
-  //   //       entityType,
-  //   //       parentFolderName
-  //   //       // file,
-  //   //       // uploadedFileName
-  //   //     );
-  //   //     setOpenFileModal(false);
-  //   //   } catch (e) {}
-  //   // }
-  // };
-
-  // const handleAddUserPermission = (
-  //   id = newFolder.name.trim().replace(/\s/g, "")
-  // ) => {
-  //   addUserPermission(id, newFolder.permissionLevel, newFolder.userURI);
-  // };
 
   const handleDeleteUserPermission =  (id) => {
     const permissionId = getLinkInfo(id, 2)
@@ -116,6 +99,7 @@ function DocumentTree() {
                     isEdit: false,
                     initialData: {},
                     updateType: null,
+                    userLevel: ''
                   },
                   file: {
                     isOpen: false,
@@ -143,6 +127,7 @@ function DocumentTree() {
               eventType={modals.folder.isEdit ? 'Edit' : 'Add'}
               folderId={modals.folder.folderId}
               handleDeleteUserPermission={handleDeleteUserPermission}
+              isRoot={modals.folder.isRoot}
             />
           )}
 
@@ -161,7 +146,7 @@ function DocumentTree() {
           <FileManageModal onClose={onClose} handleSubmit={!modals.folder.updateType? handleAddFileFetcher: handleUpdateFileFetcher} initialData={modals.folder.initialData}/>
           )}
 
-          {isOpenFileInfoModal && <FileInfo fileInfo={fileInfo} setModals={setModals}/>}
+          {isOpenFileInfoModal && <FileInfo fileInfo={fileInfo} modals={modals} setModals={setModals} setOpenFileInfoModal={setOpenFileInfoModal}/>}
 
 
           <StyledDocumentTreeWrapper>

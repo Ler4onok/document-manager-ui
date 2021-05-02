@@ -1,9 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ContentEditable from "react-contenteditable";
+import dayjs from 'dayjs'
 
 import {
   StyledFileCharacteristic,
   StyledFileCharacteristicsWrapper,
+  StyledFileCharacteristicTitle,
   StyledFileInfo,
   StyledIcon,
   StyledVersionsHeader,
@@ -18,11 +20,13 @@ import fileIcon from "../FolderList/assets/file_simple.svg";
 import editIcon from "../FolderList/assets/edit.svg";
 import { updateFile } from "../../features/document/api";
 
-export const FileInfo = ({ fileInfo, setModals }) => {
+export const FileInfo = ({ fileInfo, modals, setModals, setOpenFileInfoModal }) => {
   const [isVersionsOpen, setVersionsOpen] = useState(false);
   const [fileVersions, setFileVersions] = useState([]);
   const [isEditDisabled, setEditDisabled] = useState(true);
   const text = useRef(fileInfo["http://example.cz/name"]);
+  const contentRef = useRef(null);
+  
 
   const handleChange = event => {
       text.current = event.target.value;
@@ -33,13 +37,14 @@ export const FileInfo = ({ fileInfo, setModals }) => {
     const currentFileName = getLinkInfo(fileInfo["@id"], 2);
     updateFile(text.current, currentFileName, "");
   };
-
     
-
   return (
     <StyledFileInfo>
       <div
         style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           padding: "20px",
           background: "#2196f3",
           width: "100%",
@@ -47,17 +52,16 @@ export const FileInfo = ({ fileInfo, setModals }) => {
           boxShadow: " rgb(189 189 189) 5px 5px 10px -1px",
         }}
       >
-        <h1 style={{ margin: 0, color: "white", fontSize: "20px" }}>
+        <h1 style={{ margin: 0, marginLeft: '30%', color: "white", fontSize: "20px" }}>
           File information
         </h1>
+        <div style={{color: 'white', marginRight: '3%', cursor: 'pointer', transform: 'scale(1.3)'}} onClick={()=>setOpenFileInfoModal(false)}>✖</div>
       </div>
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
-          width: "75%",
-          padding: "20px",
+          padding: "20px 0px 20px 50px",
         }}
       >
         <StyledIcon
@@ -72,14 +76,13 @@ export const FileInfo = ({ fileInfo, setModals }) => {
           }}
         >
           <StyledFileCharacteristic
-            style={{ display: "flex", alignItems: "center" }}
           >
-            <b>File name:</b>{" "}
+            <StyledFileCharacteristicTitle>File name:</StyledFileCharacteristicTitle>{" "}
             <ContentEditable
               // suppressContentEditableWarning={true}
               disabled={isEditDisabled}
               html={text.current}
-              // innerRef={text}
+              innerRef={contentRef}
               onChange={handleChange}
               onBlur={handleBlur}
             />
@@ -89,24 +92,24 @@ export const FileInfo = ({ fileInfo, setModals }) => {
               style={{ transform: "scale(0.5)" }}
               onClick={() => {
                 setEditDisabled(!isEditDisabled);
-                // text.current.focus();
-                // setTimeout(() => {
-                //   // text.current.focus();
-                // }, 0);
+                setTimeout(() => {
+                  contentRef.current.focus();
+                }, 0);
                 
               }}
             />
           </StyledFileCharacteristic>
           <StyledFileCharacteristic>
-            <b>File type</b>: {fileInfo["http://example.cz/fileType"]}
+            <StyledFileCharacteristicTitle>File type:</StyledFileCharacteristicTitle> {fileInfo["http://example.cz/fileType"]}
           </StyledFileCharacteristic>
           <StyledFileCharacteristic>
-            <b>File version</b>: {fileInfo["http://example.cz/version"]}
+            <StyledFileCharacteristicTitle>File version:</StyledFileCharacteristicTitle> {fileInfo["http://example.cz/version"]}
           </StyledFileCharacteristic>
           <StyledFileCharacteristic>
-            <b>Date created</b>: {fileInfo["http://example.cz/created"]}
+            <StyledFileCharacteristicTitle>Date created: </StyledFileCharacteristicTitle> {dayjs.unix(fileInfo["http://example.cz/created"]).format('DD MMM YYYY HH:mm')}
           </StyledFileCharacteristic>
         </StyledFileCharacteristicsWrapper>
+        
       </div>
 
       <StyledVersionsHeaderWrapper>
@@ -116,9 +119,7 @@ export const FileInfo = ({ fileInfo, setModals }) => {
               getLinkInfo(fileInfo["@id"], 2)
             );
             const reversedFileVersions = _fileVersions
-              .map((version) => version)
-              .reverse()
-              .reverse();
+              .map((version) => version).reverse();
             setFileVersions(reversedFileVersions);
             setVersionsOpen(!isVersionsOpen);
           }}
@@ -133,6 +134,11 @@ export const FileInfo = ({ fileInfo, setModals }) => {
           top="-3px"
           transform="scale(0.6)"
           onClick={() => {
+            console.log(modals.folder.userLevel)
+            if (modals.folder.userLevel === 'READ' || modals.folder.userLevel === 'NONE'){
+              alert('You do not have permissions for this');
+              return;
+            }
             setModals({
               folder: {
                 fileAdd: true,
@@ -157,9 +163,8 @@ export const FileInfo = ({ fileInfo, setModals }) => {
           >
             <div>
               <div>{`Version ${version["http://example.cz/version"]}`}</div>
-              <div>{version["http://example.cz/fileName"]}</div>
-              <div>{version["http://example.cz/created"]}</div>
               <div>{version["http://example.cz/fileType"]}</div>
+              <div style={{color: '#80808087'}}>{dayjs.unix(version["http://example.cz/created"]).format('DD MMM YYYY HH:mm')}</div>
             </div>
             <StyledIcon
               right="5%"

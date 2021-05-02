@@ -101,6 +101,35 @@ export const getDocumentPermissions =  (documentId) => {
   }
 };
 
+export const getCurrentUser = () => {
+  const token = localStorage.getItem('token');
+  const url = 'https://kbss.felk.cvut.cz/authorization-service/api/v1/users/current'
+  try {
+    const currentUser =  request(url, "GET", null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    return currentUser;
+  } catch (error) {
+    return error;
+  }
+
+}
+
+export const getUsers = () => {
+  const token = localStorage.getItem('token');
+  const url = 'https://kbss.felk.cvut.cz/authorization-service/api/v1/tenants/current/users'
+  try {
+    const currentUser =  request(url, "GET", null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    return currentUser;
+  } catch (error) {
+    return error;
+  }
+}
+
 
 // POST
 export const addFile = async (entityType, folder, newFile, fileName) => {
@@ -111,7 +140,7 @@ export const addFile = async (entityType, folder, newFile, fileName) => {
   const formData = new FormData();
 
   formData.append("file", newFile);
-  formData.append("uri", `http://example.cz/File/${fileName}.html`);
+  formData.append("uri", `http://example.cz/File/${fileName.trim().replace(/\s/g, "")}.html`);
   formData.append("name", fileName);
 
   // formData.forEach(console.log);
@@ -131,7 +160,9 @@ export const addFile = async (entityType, folder, newFile, fileName) => {
       },
       true
     );
+    console.log(file)
     return file;
+    
   } catch (error) {
     console.log(error);
   }
@@ -184,7 +215,7 @@ export const addUserPermission = (documentId, permissionLevel, userURI) => {
   const url = `documents/${documentId}/permissions/user?namespace=http://example.cz/Document`;
 
   try {
-    request(
+    const newPermission = request(
       url,
       "POST",
       {
@@ -196,6 +227,8 @@ export const addUserPermission = (documentId, permissionLevel, userURI) => {
         "Content-Type": "application/json",
       }
     );
+
+    return newPermission;
   } catch (error) {
     throw error;
   }

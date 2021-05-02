@@ -17,13 +17,16 @@ import addFileIcon from "./assets/add_file.svg";
 import deleteFolderIcon from "./assets/delete_folder.svg";
 import getFileInfoIcon from "./assets/info.svg";
 import folderIcon from "./assets/folder_simple.svg";
+import filledFolderIcon from "./assets/folder.svg";
 import fileIcon from "./assets/file_simple.svg";
 import editIcon from "./assets/edit.svg";
 import downloadIcon from "../../assets/download.svg";
-import { useFolderChildren } from "./hooks";
+import { useFolderChildren, useFolderPermission } from "./hooks";
 import { getLinkInfo } from "../../features/document/utils";
+import { getDocumentPermissions } from "../../features/document/api";
 
 const FolderList = ({
+  rootLevel,
   list,
   setModals,
   // setOpenFileModal,
@@ -33,16 +36,32 @@ const FolderList = ({
   isRoot = false,
   parentId=null
 }) => {
-  console.log({parentId})
+
+  // const [userRights, setUserRights] = useState('')
+  // console.log({parentId})
+
+  // const getUserRights = (document) => {
+  //   const documentId = getLinkInfo(document['@id'], 2)
+  //   getDocumentPermissions(documentId).then(permissionsList => permissionsList.forEach((perm) => {
+  //     if (
+  //       perm["http://example.cz/userUri"] ===
+  //       localStorage.getItem("currentUserUri")
+  //     ) {
+  //       return(perm["http://example.cz/level"])
+  //       // setUserRights(perm["http://example.cz/level"]);
+  //     }
+  //   }))
+  // }
+
   return (
     <div style={{ width: "fit-content" }}>
-      {list.map((folder) => (
+      {list.map((document) => (
         <FolderItem
-          key={folder["@id"]}
-          folder={folder}
+          rootLevel={rootLevel}
+          key={document? document["@id"]: ''}
+          folder={document}
           isRoot={isRoot}
           setModals={setModals}
-          // setOpenFileModal={setOpenFileModal}
           setOpenFileInfoModal={setOpenFileInfoModal}
           setFileInfo={setFileInfo}
           parentId={parentId}
@@ -53,6 +72,7 @@ const FolderList = ({
 };
 
 const FolderItem = memo(({
+  rootLevel,
   folder,
   isRoot,
   setModals,
@@ -61,7 +81,8 @@ const FolderItem = memo(({
   setFileInfo,
   parentId
 }) => {
-  const { folderChilds } = useFolderChildren({ isRoot, folder })
+  const { folderChilds } = useFolderChildren({ isRoot, folder });
+  const { level } = useFolderPermission({ isRoot, document: folder });
 
   const [isOpen, setOpen] = useState(false);
   const [_opacity, setOpacity] = useState(0);
@@ -90,6 +111,22 @@ const FolderItem = memo(({
     setOpacity(0);
   };
 
+  const isFolder = getLinkInfo(folder["@id"], 1) === "Folder" || getLinkInfo(folder["@id"], 1) === "Document";
+
+  const isFilledFolder = isFolder && folderChilds.length > 0;
+
+  const renderFolderOrFileIcon = () => {
+    if (isFolder) {
+      if (isFilledFolder) {
+        return <StyledIcon src={filledFolderIcon} />;
+      } 
+
+      return <StyledIcon src={folderIcon} />;
+    };
+
+    return <StyledIcon src={fileIcon} />;
+  } 
+
   const hasChildren = isOpen && folderChilds.length > 0;
   return (
     <div>
@@ -99,15 +136,7 @@ const FolderItem = memo(({
         onMouseLeave={onMouseLeave}
       >
         <div style={{ display: "flex" }}>
-          {(getLinkInfo(folder["@id"], 1) === "Folder" ||
-            getLinkInfo(folder["@id"], 1) === "Document") && (
-            <StyledIcon src={folderIcon} />
-          )}
-
-          {getLinkInfo(folder["@id"], 1) === "File" && (
-            <StyledIcon src={fileIcon} />
-          )}
-
+          {renderFolderOrFileIcon()}
           <div onClick={(event) => {
               console.log(folder)
               event.stopPropagation();
@@ -122,6 +151,11 @@ const FolderItem = memo(({
                 src={addFolderIcon}
                 title="Add a new folder"
                 onClick={() => {
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
+
                   setModals({
                     folder: {
                       isOpen: true,
@@ -138,6 +172,10 @@ const FolderItem = memo(({
                 src={addFileIcon}
                 title="Add a new file"
                 onClick={() => {
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
                   setModals({
                     folder: {
                       isOpen: false,
@@ -160,6 +198,11 @@ const FolderItem = memo(({
                 src={editIcon}
                 title="Edit a folder"
                 onClick={() => {
+                  console.log(level)
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
                   setModals({
                     folder: {
                       isOpen: true,
@@ -179,6 +222,10 @@ const FolderItem = memo(({
                 src={deleteFolderIcon}
                 title="Delete a folder"
                 onClick={() => {
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
                   setModals({
                     folder: {
                       isOpen: false,
@@ -206,9 +253,15 @@ const FolderItem = memo(({
                 src={getFileInfoIcon}
                 title="Open file info"
                 onClick={async () => {
+                  setModals({
+                    folder: {
+                      userLevel: rootLevel
+                    }
+                  })
                   const fileInfo = await getFileInfo(
                     getLinkInfo(folder["@id"], 2)
                   );
+                  
                   setFileInfo(fileInfo);
                   setOpenFileInfoModal(true);
                 }}
@@ -236,7 +289,10 @@ const FolderItem = memo(({
                 src={deleteFolderIcon}
                 title="Delete a file"
                 onClick={() => {
-                  console.log(currentFolder['@id'])
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
                   setModals({
                     folder: {
                       isOpen: false,
@@ -261,6 +317,7 @@ const FolderItem = memo(({
         </div>
         {hasChildren && (
           <FolderList
+            rootLevel={level}
             list={folderChilds}
             // setOpenFileModal={setOpenFileModal}
             setOpenFileInfoModal={setOpenFileInfoModal}

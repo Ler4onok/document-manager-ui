@@ -1,6 +1,5 @@
 export const getLinkInfo = (link, part) => {
   if (!link) return null;
-
   const url = new URL(link);
   return `${url.pathname.split("/")[part]}`;
 };

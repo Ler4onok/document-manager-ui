@@ -181,18 +181,15 @@ export const useAddRootFolder = ({ onClose, modals }) => {
           console.log(e);
         }
       }
-
       return addedFolderResponse;
-      // handleAddUserPermission();
     } catch (e) {
       console.log(e);
     }
 
   };
 
- 
 
-  const onSuccess = (response, rootDocument) => {
+  const onSuccess = (response) => {
     const { parentFolderId } = modals.folder;
 
     if (!parentFolderId) {
@@ -207,8 +204,6 @@ export const useAddRootFolder = ({ onClose, modals }) => {
     } else {
       const ChildEntityName = `FolderChilds:${getLinkInfo(parentFolderId, 2)}`;
       const prevChildrens = queryClient.getQueryData(ChildEntityName);
-      // console.log(ChildEntityName)
-      // console.log(prevChildrens);
       if (prevChildrens) {
         queryClient.setQueryData(ChildEntityName, [
           ...prevChildrens,
@@ -219,8 +214,6 @@ export const useAddRootFolder = ({ onClose, modals }) => {
 
     onClose();
   };
-
-  
 
   const queryClient = useQueryClient();
   const { mutateAsync, isLoading, error } = useMutation(handleAddFolderFetcher, {

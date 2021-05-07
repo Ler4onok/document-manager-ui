@@ -19,9 +19,9 @@ const FileManageModal = ({initialData={}, handleSubmit, onClose}) => {
 
   const handleFileUpload = (event) => {
     const _file = event.target.files[0];
-    setFileFields({...fileFields, filename: _file.name.split('.')[0]});
-    setFileFields({...fileFields, file: _file});
+    setFileFields({...fileFields, filename: _file.name.split('.')[0],  file: _file});
   };
+  console.log(fileFields)
 
   const hasFile = fileFields.file !== null;
 
@@ -36,7 +36,6 @@ const FileManageModal = ({initialData={}, handleSubmit, onClose}) => {
       <input
         type="file"
         id="grade_csv"
-        // name="lalal"
         onChange={handleFileUpload}
         style={{ marginTop: "10px" }}
       />

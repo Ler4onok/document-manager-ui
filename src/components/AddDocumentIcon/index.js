@@ -5,7 +5,8 @@ import plusIcon from '../../assets/plus_blue.svg';
 const AddDocumentIcon = ({ onOpenAddModal }) => {
   return (
     <Icon
-      right="30px"
+      left="20px"
+      position='relative'
       src={plusIcon}
       title="Add a new document"
       onClick={onOpenAddModal}

@@ -1,12 +1,19 @@
 import React from "react";
+import { useQueryClient } from "react-query";
 import { SearchField } from "../SearchField";
 import { HeaderWrap, HeaderRightBlock } from "./styled";
 
 export const Header = ({ isAuthorized}) => {
+  // const queryClient = useQueryClient()
+  // const setInitialState = () => {
+  //   queryClient.setQueryData('RootDocuments');
+
+  // }
   return (
     <HeaderWrap>
       <div
         style={{ fontWeight: "900", fontSize: "22px", cursor: "pointer" }}
+        // onClick={setInitialState}
        
       >
         Document Manager

@@ -1,14 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useTransition, animated, useSpring, config } from "react-spring";
-import styled from "styled-components";
+import React, { useState, memo } from "react";
 
 import {
-  getSubfolders,
   deleteFolder,
-  addFolder,
-  getFiles,
   getFileInfo,
-  getFileContent, deleteFile
+  getFileContent,
+  deleteFile,
 } from "../../features/document";
 import {
   StyledFolderItem,
@@ -21,158 +17,89 @@ import addFileIcon from "./assets/add_file.svg";
 import deleteFolderIcon from "./assets/delete_folder.svg";
 import getFileInfoIcon from "./assets/info.svg";
 import folderIcon from "./assets/folder_simple.svg";
+import filledFolderIcon from "./assets/folder.svg";
 import fileIcon from "./assets/file_simple.svg";
 import editIcon from "./assets/edit.svg";
-import downloadIcon from '../../assets/download.svg'
-
-import { Modal } from "../Modal";
-
-const FolderItemWrapper = styled(animated.div)``;
+import downloadIcon from "../../assets/download.svg";
+import { useFolderChildren, useFolderPermission } from "./hooks";
+import { getLinkInfo } from "../../features/document/utils";
+import { getDocumentPermissions } from "../../features/document/api";
 
 const FolderList = ({
+  rootLevel,
   list,
-  setOpenFolderModal,
-  setOpenFileModal,
+  setModals,
+  // setOpenFileModal,
   setOpenFileInfoModal,
-  newFolder,
-  setNewFolder,
-  setFolderId,
   setFileInfo,
   setModifierModal,
   isRoot = false,
+  parentId=null
 }) => {
-  console.log(list);
+
+  // const [userRights, setUserRights] = useState('')
+  // console.log({parentId})
+
+  // const getUserRights = (document) => {
+  //   const documentId = getLinkInfo(document['@id'], 2)
+  //   getDocumentPermissions(documentId).then(permissionsList => permissionsList.forEach((perm) => {
+  //     if (
+  //       perm["http://example.cz/userUri"] ===
+  //       localStorage.getItem("currentUserUri")
+  //     ) {
+  //       return(perm["http://example.cz/level"])
+  //       // setUserRights(perm["http://example.cz/level"]);
+  //     }
+  //   }))
+  // }
+
   return (
     <div style={{ width: "fit-content" }}>
-      {list.map((folder) => (
+      {list.map((document) => (
         <FolderItem
-          key={folder["@id"]}
-          folder={folder}
+          rootLevel={rootLevel}
+          key={document? document["@id"]: ''}
+          folder={document}
           isRoot={isRoot}
-          setOpenFolderModal={setOpenFolderModal}
-          setOpenFileModal={setOpenFileModal}
+          setModals={setModals}
           setOpenFileInfoModal={setOpenFileInfoModal}
-          newFolder={newFolder}
-          setNewFolder={setNewFolder}
-          setFolderId={setFolderId}
           setFileInfo={setFileInfo}
-          setModifierModal={setModifierModal}
+          parentId={parentId}
         />
       ))}
     </div>
   );
 };
 
-const FolderItem = ({
+const FolderItem = memo(({
+  rootLevel,
   folder,
   isRoot,
-  setOpenFolderModal,
-  setOpenFileModal,
+  setModals,
+  // setOpenFileModal,
   setOpenFileInfoModal,
-  newFolder,
-  setNewFolder,
-  setFolderId,
   setFileInfo,
-  setModifierModal,
+  parentId
 }) => {
-  const [folderContent, setFolderContent] = useState([]);
+  const { folderChilds } = useFolderChildren({ isRoot, folder });
+  const { level } = useFolderPermission({ isRoot, document: folder });
+
   const [isOpen, setOpen] = useState(false);
   const [_opacity, setOpacity] = useState(0);
-
-  const { opacity, transform } = useSpring({
-    from: { opacity: 0, transform: "translate3d(20px,0,0)" },
-    to: {
-      // height:
-      //   isRoot && isOpen
-      //     ? "auto"
-      //     : isOpen
-      //     ? (folderContent.length + 1) * 25 + folderContent.length * 15
-      //     : 25,
-      opacity: 1,
-      transform: `translate3d(0px,0,0)`,
-    },
-    config: config.stiff,
-  });
-
-  // console.log(height.startPosition);
-  // console.log(folderContent.length);
-
-  //part 1 - type of the file, part 2 - name of the file
-  function getLinkInfo(link, part) {
-    const url = new URL(link);
-    return `${url.pathname.split("/")[part]}`;
-  }
-
-  const getSubfolderList = async () => {
-    // const folderId = folder["@id"].replace(
-    //   `http://example.cz/${isRoot ? "Document" : "Folder"}/`,
-    //   ""
-    // );
-
-    console.log("lalalall");
-
-    const folderId = getLinkInfo(folder["@id"], 2);
-
-    const url = `folders/${folderId}${
-      isRoot ? "_root" : ""
-    }/subfolders?namespace=http://example.cz/Folder`;
-
-    try {
-      const _subfolderList = await getSubfolders(url);
-      return _subfolderList;
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const getFilesList = async (isRoot) => {
-    const folderId = folder["@id"].replace(
-      `http://example.cz/${isRoot ? "Document" : "Folder"}/`,
-      ""
-    );
-
-    const url = `folders/${folderId}${
-      isRoot ? "_root" : ""
-    }//files?namespace=http://example.cz/Folder`;
-
-    try {
-      const _filesList = await getFiles(url);
-      console.log(_filesList);
-
-      return _filesList;
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const getFolderContent = async () => {
-    try {
-      const subfolders = await getSubfolderList();
-      const files = await getFilesList(isRoot);
-      setFolderContent(subfolders.concat(files));
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const [currentFolder, setCurrentFolder] = useState(folder);
 
   const handleDeleteFolder = async () => {
-   await deleteFolder(getLinkInfo(folder["@id"], 2), isRoot);
+    await deleteFolder(getLinkInfo(folder["@id"], 2), isRoot);
   };
 
   const handleDeleteFile = async () => {
     await deleteFile(getLinkInfo(folder["@id"], 2));
-  }
-
-
-  useEffect(() => {
-    getFolderContent();
-    // getFiles();
-  }, []);
-
-  const onOpenFolder = (event) => {
-    event.stopPropagation();
-    if (folderContent.length > 0) setOpen(!isOpen);
   };
+
+  // const onOpenFolder = (event) => {
+  //   event.stopPropagation();
+  //   if (folderChilds.length > 0) setOpen(!isOpen);
+  // };
 
   const onMouseEnter = (e) => {
     e.stopPropagation();
@@ -184,64 +111,139 @@ const FolderItem = ({
     setOpacity(0);
   };
 
-  const hasChildren = isOpen && folderContent.length > 0;
-  // console.log(folder);
+  const isFolder = getLinkInfo(folder["@id"], 1) === "Folder" || getLinkInfo(folder["@id"], 1) === "Document";
+
+  const isFilledFolder = isFolder && folderChilds.length > 0;
+
+  const renderFolderOrFileIcon = () => {
+    if (isFolder) {
+      if (isFilledFolder) {
+        return <StyledIcon src={filledFolderIcon} />;
+      } 
+
+      return <StyledIcon src={folderIcon} />;
+    };
+
+    return <StyledIcon src={fileIcon} />;
+  } 
+
+  const hasChildren = isOpen && folderChilds.length > 0;
   return (
     <div>
       <StyledFolderItem
-        style={{ opacity, transform }}
         isOpen={hasChildren}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
         <div style={{ display: "flex" }}>
-          {(getLinkInfo(folder["@id"], 1) === "Folder" ||
-            getLinkInfo(folder["@id"], 1) === "Document") && (
-            <StyledIcon src={folderIcon}/>
-          )}
-
-          {getLinkInfo(folder["@id"], 1) === "File" && (
-            <StyledIcon src={fileIcon}/>
-          )}
-
-          <div onClick={onOpenFolder}>{folder["http://example.cz/name"]}</div>
+          {renderFolderOrFileIcon()}
+          <div onClick={(event) => {
+              console.log(folder)
+              event.stopPropagation();
+              if (folderChilds.length > 0) setOpen(!isOpen);
+              setCurrentFolder(folder);
+              console.log(currentFolder)
+          }}>{folder["http://example.cz/name"]}</div>
           {(getLinkInfo(folder["@id"], 1) === "Folder" ||
             getLinkInfo(folder["@id"], 1) === "Document") && (
             <StyledIconWrapper opacity={_opacity}>
               <StyledIcon
                 src={addFolderIcon}
-                title='Add a new folder'
+                title="Add a new folder"
                 onClick={() => {
-                  setModifierModal({ addModal: { isOpen: true } });
-                  setOpenFolderModal(true);
-                  setNewFolder({ ...newFolder, type: "Folder", event: 'Add' });
-                  setFolderId({ id: folder["@id"], name: folder['http://example.cz/name'], description: folder['http://example.cz/description'], isRoot: isRoot });
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
+
+                  setModals({
+                    folder: {
+                      isOpen: true,
+                      folderId: null,
+                      parentFolderId: folder["@id"] || null,
+                      isEdit: false,
+                      isRoot,
+                      initialData: {},
+                    },
+                  });
                 }}
               />
               <StyledIcon
                 src={addFileIcon}
-                title='Add a new file'
+                title="Add a new file"
                 onClick={() => {
-                  setOpenFileModal(true);
-                  setNewFolder({ ...newFolder, type: "File", event: 'Add' });
-                  setFolderId({ id: folder["@id"],   name: folder['http://example.cz/name'], description: folder['http://example.cz/description'], isRoot: isRoot });
-                }}
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
+                  setModals({
+                    folder: {
+                      isOpen: false,
+                      folderId: folder['@id'],
+                      parentFolderId: isRoot? null : folder['http://example.cz/parentFolder']["@id"],
+                      isRoot,
+                      fileAdd: true,
+                      updateType: null
+                    },
+                    file: {
+                      isOpen: true,
+                      isAdd: true,
+                    }
+                  });
+                }
+              }
               />
 
               <StyledIcon
                 src={editIcon}
-                title='Edit a folder'
+                title="Edit a folder"
                 onClick={() => {
-                  setOpenFolderModal(true);
-                  setNewFolder({name: folder['http://example.cz/name'] , description: folder['http://example.cz/description'],  type: getLinkInfo(folder["@id"], 1), event: 'Edit'});
-                  setFolderId({ id: folder["@id"], name: folder['http://example.cz/name'], description: folder['http://example.cz/description'], isRoot: isRoot });
+                  console.log(level)
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
+                  setModals({
+                    folder: {
+                      isOpen: true,
+                      folderId: folder['@id'],
+                      parentFolderId: isRoot? null : folder['http://example.cz/parentFolder']["@id"],
+                      isEdit: true,
+                      isRoot,
+                      initialData: {
+                        name: folder["http://example.cz/name"],
+                        description: folder["http://example.cz/description"],
+                      },
+                    },
+                  });
                 }}
               />
               <StyledIcon
                 src={deleteFolderIcon}
-                title='Delete a folder'
-                onClick={() => handleDeleteFolder()}
-              />
+                title="Delete a folder"
+                onClick={() => {
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
+                  setModals({
+                    folder: {
+                      isOpen: false,
+                      folderId: folder['@id'],
+                      parentFolderId: isRoot? null : folder['http://example.cz/parentFolder']["@id"],
+                      isEdit: false,
+                      isDelete: true,
+                      isRoot,
+                      initialData: {
+                        name: folder["http://example.cz/name"],
+                        description: folder["http://example.cz/description"],
+                      },
+                    },
+                    file: {
+                      isFile: false
+                    }
+                  });
+                }}              />
             </StyledIconWrapper>
           )}
 
@@ -249,56 +251,84 @@ const FolderItem = ({
             <StyledIconWrapper opacity={_opacity}>
               <StyledIcon
                 src={getFileInfoIcon}
-                title='Open file info'
+                title="Open file info"
                 onClick={async () => {
+                  setModals({
+                    folder: {
+                      userLevel: rootLevel
+                    }
+                  })
                   const fileInfo = await getFileInfo(
                     getLinkInfo(folder["@id"], 2)
                   );
+                  
                   setFileInfo(fileInfo);
-
-                  // console.log(fileInfo);
                   setOpenFileInfoModal(true);
                 }}
               />
-              <StyledIcon src={downloadIcon} title='Download a file'onClick={async ()=>{
-                const fileName = getLinkInfo(folder["@id"], 2);
-                const fileContent = await getFileContent(fileName);
-                const url = URL.createObjectURL(new Blob([fileContent]));
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute(
-                  'download',
-                  `${folder['http://example.cz/fileName']}`,
-                );
-            
-                document.body.appendChild(link);
-                link.click();
-                link.parentNode.removeChild(link);
-              }}/>
+              <StyledIcon
+                src={downloadIcon}
+                title="Download a file"
+                onClick={async () => {
+                  const fileName = getLinkInfo(folder["@id"], 2);
+                  const fileContent = await getFileContent(fileName);
+                  const url = URL.createObjectURL(new Blob([fileContent]));
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.setAttribute(
+                    "download",
+                    `${folder["http://example.cz/fileName"]}`
+                  );
+
+                  document.body.appendChild(link);
+                  link.click();
+                  link.parentNode.removeChild(link);
+                }}
+              />
               <StyledIcon
                 src={deleteFolderIcon}
-                title='Delete a file'
-                onClick={() => handleDeleteFile()}
+                title="Delete a file"
+                onClick={() => {
+                  if (level === 'READ' || level === 'NONE' || rootLevel === 'READ' || rootLevel === 'NONE') {
+                    alert('You do not have permissions for this');
+                    return;
+                  }
+                  setModals({
+                    folder: {
+                      isOpen: false,
+                      folderId: folder['@id'],
+                      parentFolderId: parentId,
+                      isEdit: false,
+                      isDelete: true,
+                      isRoot,
+                      initialData: {
+                        name: folder["http://example.cz/name"],
+                        description: folder["http://example.cz/description"],
+                      },
+                    },
+                    file: {
+                      isFile: true
+                    }
+                  });
+                }}
               />
             </StyledIconWrapper>
           )}
         </div>
         {hasChildren && (
           <FolderList
-            list={folderContent}
-            setOpenFolderModal={setOpenFolderModal}
-            setOpenFileModal={setOpenFileModal}
+            rootLevel={level}
+            list={folderChilds}
+            // setOpenFileModal={setOpenFileModal}
             setOpenFileInfoModal={setOpenFileInfoModal}
-            newFolder={newFolder}
-            setNewFolder={setNewFolder}
-            setFolderId={setFolderId}
             setFileInfo={setFileInfo}
-            setModifierModal={setModifierModal}
+            setModals={setModals}
+            parentId={folder['@id']}
           />
         )}
       </StyledFolderItem>
     </div>
   );
-};
+});
 
 export { FolderList };

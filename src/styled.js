@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
-export const StyledApp = styled.div`
-  font-family: "Open Sans", sans-serif;
+export const Container = styled.div`
+font-family: 'Montserrat', sans-serif;
   color: black;
   height: 100%;
   background: #f4f4f2;
@@ -34,7 +34,7 @@ export const StyledIcon = styled.img`
 
 export const StyledFileInfo = styled.div`
   position: absolute;
-  height: 400px;
+  height: 450px;
   overflow: auto;
   overflow-x: hidden;
   z-index: 10;
@@ -43,7 +43,6 @@ export const StyledFileInfo = styled.div`
   width: 30%;
   border: 1px solid #8080803b;
   border-radius: 25px;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
